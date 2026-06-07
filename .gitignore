@@ -39,8 +39,11 @@ yarn-error.log*
 /.vscode
 /.vs
 
-# project briefs (large PDFs kept local only)
+# project briefs (kept local only — not part of the deployed site)
 *.pdf
+brief.txt
+brief_extract.txt
+/brief_pages/
 
 # vercel
 .vercel
