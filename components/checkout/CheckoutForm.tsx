@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ShieldCheck, Car, MapPin, Calendar, User, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -59,6 +59,11 @@ function isValidPackageId(s: string): s is PackageId {
   return s === 'standard' || s === 'comprehensive' || s === 'premium'
 }
 
+// Stripe Checkout is a full-page redirect, so a cancelled payment lands back on a
+// freshly-mounted /checkout with an empty form. Stash the form before redirecting
+// and restore it on the cancelled return so the user doesn't re-type everything.
+const FORM_STORAGE_KEY = 'ccc-checkout-form'
+
 export function CheckoutForm() {
   const search = useSearchParams()
   const baseId = useId()
@@ -82,6 +87,32 @@ export function CheckoutForm() {
   const paymentCancelled = search.get('cancelled') === '1'
 
   const id = (k: string) => `${baseId}-${k}`
+
+  // Restore the saved form after a cancelled Stripe redirect; otherwise clear any
+  // stale draft so a fresh visit always starts empty. Read the cancelled flag from
+  // window.location directly (not the reactive searchParams): /checkout is
+  // statically prerendered, so useSearchParams() is empty on the first client
+  // render and would mis-fire this. Deferred to a task so we never call setState
+  // synchronously in the effect body (repo lint rule) and so it runs post-hydration.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const cancelled = new URLSearchParams(window.location.search).get('cancelled') === '1'
+      if (!cancelled) {
+        try {
+          sessionStorage.removeItem(FORM_STORAGE_KEY)
+        } catch {}
+        return
+      }
+      try {
+        const raw = sessionStorage.getItem(FORM_STORAGE_KEY)
+        if (!raw) return
+        const saved = JSON.parse(raw) as Partial<BookingFormData>
+        // Keep the package from the URL (the cancel link carries it); restore the rest.
+        setForm((prev) => ({ ...prev, ...saved, packageId: prev.packageId }))
+      } catch {}
+    }, 0)
+    return () => clearTimeout(t)
+  }, [])
 
   const update = (patch: Partial<BookingFormData>) => {
     setForm((prev) => ({ ...prev, ...patch }))
@@ -146,6 +177,10 @@ export function CheckoutForm() {
       }
 
       trackEvent(GA_EVENTS.CHECKOUT_SUBMITTED, { package: form.packageId })
+      // Save the form so a cancelled payment can restore it (see the mount effect).
+      try {
+        sessionStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(form))
+      } catch {}
       // Hand off to Stripe Checkout. Keep `submitting` true through the redirect
       // so the button stays disabled.
       window.location.href = data.checkoutUrl

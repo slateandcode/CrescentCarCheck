@@ -102,11 +102,15 @@ export function ScheduleSlot({
   })
 
   // On mount: resolve "today" in Dubai and default the date to it if unset, so
-  // the current day is pre-selected and availability loads immediately.
+  // the current day is pre-selected and availability loads immediately. Deferred
+  // to a task so we never call setState synchronously in the effect body.
   useEffect(() => {
     const t = dubaiTodayISO()
-    setToday(t)
-    if (!DATE_RE.test(dateRef.current)) onChangeRef.current({ inspectionDate: t })
+    const apply = setTimeout(() => {
+      setToday(t)
+      if (!DATE_RE.test(dateRef.current)) onChangeRef.current({ inspectionDate: t })
+    }, 0)
+    return () => clearTimeout(apply)
   }, [])
 
   // Long-distance areas are 9:30 AM only. If the customer already had another
@@ -141,7 +145,11 @@ export function ScheduleSlot({
       if (!active) return
       setLoading(true)
       setLoadError(false)
-      setClearedMessage(false)
+      // NOTE: do NOT reset clearedMessage here. A distance change to a
+      // long-distance emirate clears an incompatible slot and sets clearedMessage
+      // in a separate effect; this fetch fires on the same change, so resetting it
+      // here would wipe that explanation before the user can read it. The message
+      // is cleared when the user explicitly clicks a slot.
     }, 0)
 
     fetch(

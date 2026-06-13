@@ -48,6 +48,10 @@ brief_extract.txt
 # vercel
 .vercel
 
+# netlify build output + local agent config (never committed)
+.netlify/
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,19 +1,16 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { AlertTriangle, ArrowRight, Camera, CheckCircle2, FileText } from 'lucide-react'
+import { ArrowRight, Camera, CheckCircle2, FileText } from 'lucide-react'
 import { useReveal } from '@/hooks/useReveal'
 import { ButtonLink } from '@/components/ui/ButtonLink'
 
-const REPORT_CATEGORIES = [
-  { label: 'Engine & Performance', status: 'pass' as const, note: 'No leaks · compression within spec' },
-  { label: 'Transmission', status: 'pass' as const, note: 'Smooth shifts · fluid clean' },
-  { label: 'Brakes & Suspension', status: 'pass' as const, note: 'Pads 60% · shocks healthy' },
-  { label: 'Body & Paint', status: 'watch' as const, note: 'Minor respray on rear quarter' },
-  { label: 'Electrical & Electronics', status: 'pass' as const, note: 'All systems responsive' },
-  { label: 'Interior & Comfort', status: 'pass' as const, note: 'No wear beyond mileage' },
-  { label: 'Tyres & Wheels', status: 'watch' as const, note: 'Front pair near replacement' },
-  { label: 'Underbody & Frame', status: 'pass' as const, note: 'No accident damage detected' },
+const REPORT_META = [
+  ['Package', 'Premium · 600+ point check'],
+  ['Inspection Date', '20 May 2026'],
+  ['Reference', 'CCR-2026-0003'],
+  ['Crescent Score', '83/100'],
 ]
 
 export function SampleReport() {
@@ -73,82 +70,68 @@ export function SampleReport() {
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative mx-auto w-full max-w-[400px]">
           <div className="absolute -inset-4 bg-accent/10 rounded-card-lg blur-2xl" aria-hidden="true" />
           <div
-            className="relative bg-light-card border border-light-border rounded-card-lg shadow-[0_24px_60px_rgba(0,0,0,0.12)] overflow-hidden"
+            className="relative aspect-[210/297] overflow-hidden rounded-card-lg border border-border bg-gradient-to-b from-surface to-background shadow-[0_24px_60px_rgba(0,0,0,0.45)]"
             role="img"
-            aria-label="Sample inspection report preview"
+            aria-label="Sample Crescent Car Check inspection report — cover page for a 2021 Toyota Land Cruiser, Crescent Score 83 out of 100, verdict: Negotiate"
           >
-            <div className="bg-background text-text-primary px-5 sm:px-6 py-4 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] tracking-[0.18em] text-accent font-semibold truncate">
-                  CRESCENT CAR CHECK
-                </p>
-                <p className="font-bold text-sm sm:text-base mt-0.5 truncate">Vehicle Inspection Report</p>
+            {/* Large crescent watermark, bleeding off the bottom-right corner */}
+            <Image
+              src="/Crescent.png"
+              alt=""
+              width={460}
+              height={460}
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-20 -right-20 w-[80%] max-w-none select-none opacity-[0.05]"
+            />
+
+            <span className="absolute right-5 top-5 sm:right-6 sm:top-6 text-[9px] font-semibold uppercase tracking-[0.25em] text-text-muted">
+              Sample
+            </span>
+
+            <div className="relative flex h-full flex-col justify-between p-6 sm:p-7">
+              {/* Logo */}
+              <div className="relative h-9 w-[140px] sm:h-10 sm:w-[156px]">
+                <Image
+                  src="/Logo Non BG.png"
+                  alt="Crescent Car Check"
+                  fill
+                  sizes="156px"
+                  className="object-contain object-left"
+                />
               </div>
-              <span className="text-[10px] text-text-secondary tracking-wider flex-shrink-0">SAMPLE</span>
-            </div>
 
-            <div className="px-5 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-light-border">
-              {[
-                ['Make', 'Mercedes'],
-                ['Model', 'S-Class'],
-                ['Year', '2021'],
-                ['VIN', 'WDD••••••'],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <p className="text-[10px] uppercase tracking-widest text-light-text-muted">{k}</p>
-                  <p className="text-light-text font-semibold text-sm mt-1">{v}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 bg-success-muted border-b border-light-border">
-              <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-light-text-muted">
-                  Overall Verdict
+              {/* Cover details */}
+              <div>
+                <div className="h-1 w-10 rounded-full bg-accent" aria-hidden="true" />
+                <p className="mt-4 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
+                  Vehicle Inspection Report
                 </p>
-                <p className="text-success font-bold text-base sm:text-lg mt-0.5 truncate">Recommended to Buy</p>
-              </div>
-              <CheckCircle2 className="w-7 h-7 sm:w-8 sm:h-8 text-success flex-shrink-0" aria-hidden="true" />
-            </div>
+                <h3 className="mt-2 text-2xl sm:text-[1.75rem] font-bold leading-[1.05] tracking-tight text-text-primary">
+                  2021 Toyota Land Cruiser
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-text-secondary">
+                  GCC · Automatic · Petrol · Pearl White
+                </p>
 
-            <div className="px-5 sm:px-6 py-5 space-y-2.5">
-              {REPORT_CATEGORIES.map((cat) => {
-                const isPass = cat.status === 'pass'
-                return (
-                  <div
-                    key={cat.label}
-                    className="flex items-center justify-between gap-3 py-2 border-b border-light-border last:border-b-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-light-text font-semibold text-sm truncate">{cat.label}</p>
-                      <p className="text-light-text-muted text-xs truncate">{cat.note}</p>
+                <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3.5">
+                  {REPORT_META.map(([k, v]) => (
+                    <div key={k}>
+                      <dt className="text-[9px] font-semibold uppercase tracking-[0.18em] text-text-muted">
+                        {k}
+                      </dt>
+                      <dd className="mt-1 text-xs sm:text-sm font-semibold text-text-primary">{v}</dd>
                     </div>
-                    <span
-                      className={
-                        'inline-flex items-center gap-1 px-2 py-1 rounded-tag text-[10px] font-bold uppercase tracking-wider flex-shrink-0 ' +
-                        (isPass
-                          ? 'bg-success-muted text-success'
-                          : 'bg-warning-muted text-warning')
-                      }
-                    >
-                      {isPass ? (
-                        <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
-                      ) : (
-                        <AlertTriangle className="w-3 h-3" aria-hidden="true" />
-                      )}
-                      {isPass ? 'Pass' : 'Watch'}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
+                  ))}
+                </dl>
 
-            <div className="px-5 sm:px-6 py-3 bg-light-surface text-light-text-muted text-[10px] flex items-center justify-between gap-3 border-t border-light-border">
-              <span className="truncate">Sample preview</span>
-              <span className="flex-shrink-0">Page 1 of 24</span>
+                <span className="mt-5 inline-flex items-center gap-2 rounded-button bg-white px-3.5 py-1.5 text-sm font-bold text-background">
+                  <span className="h-2 w-2 rounded-full bg-warning" aria-hidden="true" />
+                  Negotiate
+                </span>
+              </div>
             </div>
           </div>
         </div>

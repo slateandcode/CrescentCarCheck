@@ -8,6 +8,10 @@ export const metadata: Metadata = {
 
 const LAST_UPDATED = '1 June 2026'
 
+// Match the env-driven address used in the Footer, Contact and Confirmation
+// pages so every contact surface resolves to one email once env is set.
+const BUSINESS_EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.com'
+
 const SECTIONS = [
   {
     heading: 'Acceptance of Terms',
@@ -54,7 +58,7 @@ const SECTIONS = [
   {
     heading: 'Contact Us',
     body: [
-      'For any questions about these terms, please contact us at crescentcarcheck@gmail.com.',
+      `For any questions about these terms, please contact us at ${BUSINESS_EMAIL}.`,
     ],
   },
 ]

@@ -7,11 +7,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // /confirmation carries a booking reference and is already noindex; /api
-      // holds only POST endpoints — neither belongs in search results.
-      disallow: ['/api/', '/confirmation'],
+      // /api holds only POST endpoints. /confirmation is intentionally NOT
+      // disallowed: the page already sets `noindex`, and a robots.txt Disallow
+      // would stop crawlers from fetching it and ever seeing that noindex —
+      // letting a shared URL surface as a bare listing. Crawlable + noindex
+      // gets it fully dropped instead.
+      disallow: ['/api/'],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL,
+    // The non-standard Host directive expects a bare hostname, not a URL with a
+    // scheme (Next emits `Host: <value>` verbatim).
+    host: new URL(BASE_URL).host,
   }
 }

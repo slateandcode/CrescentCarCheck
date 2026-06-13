@@ -10,7 +10,7 @@ export function PackagesSection() {
   const ref = useReveal<HTMLDivElement>()
 
   return (
-    <section className="bg-light-bg section-padding">
+    <section className="bg-light-bg section-padding !pt-0">
       <div ref={ref} className="reveal container-wide">
         <div className="max-w-2xl">
           <h2 className="text-display-sm md:text-display-md font-bold text-light-text">

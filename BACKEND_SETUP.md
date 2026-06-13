@@ -10,25 +10,38 @@ Copy `.env.example` → `.env.local` and fill in what you have.
 
 ---
 
-## 1. Supabase (booking database) — `lib/supabase/server.ts`, `app/api/bookings/route.ts`
+## 1. Supabase (booking database) — `lib/supabase/server.ts`, `lib/availability.ts`, `app/api/bookings/route.ts`
 
-Stores each booking request. Until configured, `/api/bookings` validates the
-request and returns a reference, but nothing is persisted.
+The booking system lives in the **shared Supabase project that the Crescent Car
+Reports admin app also uses**, so bookings, inspectors and reports sit in one
+database. This website connects with the service-role key and talks to the
+database **only through the `SECURITY DEFINER` RPCs** (`booking_slot_availability`,
+`create_booking_hold`, `confirm_booking_paid`, `cancel_pending_booking`) — it never
+writes the `bookings` table directly. The DB generates the customer-facing
+`CCB-XXXXXX` reference and enforces every slot rule atomically.
+
+> ⚠️ **Schema ownership.** The `bookings` table and its RPCs are owned by the
+> **Crescent Car Reports** repo's migrations (`006_bookings.sql` +
+> `007_simplify_booking_statuses.sql`) and must be applied **from that repo**.
+> **Do NOT run this repo's `supabase/migrations/001_bookings.sql` or
+> `002_payment_flow.sql`** — both are kept only for history and are headered
+> `⚠️ SUPERSEDED / DO NOT APPLY`. Running them (or `supabase db push` from this
+> repo) would create a conflicting, outdated table with the wrong status values
+> and no RPCs, and `/api/bookings` would 500.
 
 **Activate:**
-1. Create a Supabase project.
+1. Point this site at the same Supabase project as Crescent Car Reports.
 2. Set:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only — never exposed to the browser)
-3. Run the schema in `supabase/migrations/001_bookings.sql` (SQL Editor or
-   `supabase db push`). The `bookings` table uses the API's human-friendly
-   `CCC-…` reference as its text primary key, and RLS is locked to the service
-   role only (the server client bypasses RLS).
+3. Ensure the Reports repo's booking migrations have been applied to that project
+   (they create the `bookings` table, the RPCs, and the service-role grants).
 
-Once set, `isSupabaseConfigured()` flips true and `persistBooking()` inserts every
-booking. A DB error returns a clean 500 to the user (the request is *not* silently
-dropped).
+The live booking flow needs **both Supabase and Stripe** (§5): the customer pays to
+secure the slot. Until both are configured, `POST /api/bookings` returns a clean
+**503** ("Online booking is temporarily unavailable. Please WhatsApp us to book.")
+— the form fails gracefully rather than pretending a booking went through.
 
 ## 2. Google Analytics 4 — `app/layout.tsx`, `lib/analytics.ts`
 

@@ -106,7 +106,7 @@ export function InspectionHighlights() {
   }, [])
 
   return (
-    <section className="bg-light-bg section-padding">
+    <section className="bg-light-bg section-padding !pb-10 sm:!pb-12 md:!pb-14 lg:!pb-16">
       <div className="container-wide">
         <div ref={headingRef} className="reveal text-center max-w-2xl mx-auto mb-10 md:mb-12">
           <h2 className="text-display-sm md:text-display-md font-bold text-light-text">

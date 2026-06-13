@@ -3,11 +3,12 @@ import type Stripe from 'stripe'
 import { getStripe, isStripeConfigured } from '@/lib/stripe'
 import {
   attachCalendarEvent,
+  getBookingById,
   markBookingCancelled,
   markBookingPaid,
   rowToRecord,
 } from '@/lib/availability'
-import { notifyPaidBooking } from '@/lib/email'
+import { notifyLatePaymentRefund, notifyPaidBooking } from '@/lib/email'
 import { createTentativeHold } from '@/lib/calendar'
 import type { Booking } from '@/types/booking'
 
@@ -105,7 +106,29 @@ async function handlePaid(session: Stripe.Checkout.Session): Promise<void> {
   // Idempotent: only a still-pending hold transitions; a repeat returns null.
   const row = await markBookingPaid(bookingId, paymentIntentId)
   if (!row) {
-    console.log('[webhook] booking already processed — no-op', { bookingId })
+    // A null result means EITHER (a) the booking was already paid — a genuine
+    // idempotent webhook replay — OR (b) the 30-minute hold was released/cancelled
+    // before this payment landed (the customer paid on a stale Checkout session
+    // after the slot was freed). Distinguish the two so we never silently keep
+    // money for a slot the customer didn't actually get.
+    const existing = await getBookingById(bookingId)
+    if (existing?.payment_status === 'paid') {
+      console.log('[webhook] booking already paid — no-op', { bookingId })
+      return
+    }
+    // Late payment on a released hold: refund the charge and alert the owner.
+    console.warn('[webhook] payment landed after hold release — auto-refunding', { bookingId })
+    if (paymentIntentId) {
+      try {
+        await getStripe().refunds.create(
+          { payment_intent: paymentIntentId },
+          { idempotencyKey: `late-refund-${bookingId}` },
+        )
+      } catch (err) {
+        console.error('[webhook] auto-refund failed — manual refund required', { bookingId }, err)
+      }
+    }
+    if (existing) await notifyLatePaymentRefund(rowToRecord(existing as Booking), paymentIntentId)
     return
   }
 

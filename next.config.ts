@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Next 16 only generates the quality variants listed here (default [75]).
+    // Our <Image> components request 88/90/95; without these, Next logs a warning
+    // and serves the image un-optimised at the requested quality.
+    qualities: [75, 88, 90, 95],
   },
   logging: {
     fetches: { fullUrl: false },

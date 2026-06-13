@@ -162,6 +162,46 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
   }
 }
 
+/**
+ * Owner alert for the rare case where a payment completes AFTER its slot hold was
+ * already released (customer paid on a stale Checkout session once the 30-minute
+ * hold had expired and the slot was freed). The webhook refunds the charge
+ * automatically; this notifies the owner so they can follow up with the customer.
+ * Best-effort — never throws.
+ */
+export async function notifyLatePaymentRefund(
+  record: BookingRecord,
+  paymentIntentId: string | null,
+): Promise<void> {
+  if (!isResendConfigured()) {
+    console.log('[email] Resend not configured — skipping late-payment alert', { id: record.id })
+    return
+  }
+  if (!OWNER_EMAIL) {
+    console.warn('[email] BUSINESS_OWNER_EMAIL not set — late-payment alert skipped')
+    return
+  }
+  try {
+    await getResend().emails.send({
+      from: fromAddress(),
+      to: OWNER_EMAIL,
+      replyTo: record.customerEmail || undefined,
+      subject: `ACTION: late payment auto-refunded — ${record.id} (${record.emirate})`,
+      html: layout(
+        'Late payment auto-refunded',
+        `<p style="font-size:14px;color:#3f3f46;margin:0 0 16px;">
+           A customer completed payment for booking <strong>${esc(record.id)}</strong> after its
+           slot hold had already been released, so the slot was no longer reserved. The charge
+           ${paymentIntentId ? `(${esc(paymentIntentId)}) ` : ''}has been refunded automatically.
+           Get in touch if they'd still like to book.
+         </p>${bookingTable(record)}`,
+      ),
+    })
+  } catch (err) {
+    console.error('[email] late-payment alert failed', err)
+  }
+}
+
 export interface ContactMessage {
   name: string
   email: string
