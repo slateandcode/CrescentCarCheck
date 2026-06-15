@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { notifyContactMessage } from '@/lib/email'
 import { createServerClient, isSupabaseConfigured } from '@/lib/supabase/server'
+import { clientIp, rateLimitOk } from '@/lib/rate-limit'
 
 /** Saves the contact message so it's never lost if email delivery fails. Best-effort. */
 async function saveContactMessage(msg: {
@@ -53,6 +54,15 @@ interface ContactPayload {
  * notifyContactMessage() logs and no-ops, so the form works in every environment.
  */
 export async function POST(req: Request) {
+  // Anti-abuse: cap contact submissions per IP (each accepted message hits the
+  // owner inbox + the shared DB). Fails open if the limiter is unavailable.
+  if (!(await rateLimitOk(`contact:${clientIp(req)}`, 5, 60))) {
+    return NextResponse.json(
+      { ok: false, error: 'Too many messages. Please wait a minute and try again.' },
+      { status: 429 },
+    )
+  }
+
   let body: ContactPayload
   try {
     body = (await req.json()) as ContactPayload

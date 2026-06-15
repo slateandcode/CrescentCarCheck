@@ -71,13 +71,17 @@ export async function POST(req: Request) {
         if (bookingId) await markBookingCancelled(bookingId)
         break
       }
-      case 'payment_intent.payment_failed': {
-        // Best-effort: only relevant once a payment intent is linked to a booking.
-        const intent = event.data.object
-        const bookingId = intent.metadata?.booking_id
-        if (bookingId) await markBookingCancelled(bookingId)
+      case 'payment_intent.payment_failed':
+        // Intentionally a NO-OP. Stripe hosted Checkout lets the customer retry a
+        // declined card on the SAME still-open session, firing this event on every
+        // failed attempt. If we cancelled the hold here, a successful retry would
+        // land on an already-cancelled booking: confirm_booking_paid returns null,
+        // handlePaid treats the good charge as a late payment on a released hold,
+        // AUTO-REFUNDS it, and frees the slot — silently destroying a real paid
+        // booking (very common with UAE 3DS / regional cards that decline first).
+        // Abandoned holds are freed by checkout.session.expired + the 30-minute
+        // hold sweep instead, so no cancellation is needed here.
         break
-      }
       default:
         // Unhandled event types are acknowledged so Stripe stops retrying.
         break

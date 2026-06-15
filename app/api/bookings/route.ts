@@ -12,6 +12,7 @@ import {
   rowToRecord,
 } from '@/lib/availability'
 import type { BookingHoldInput } from '@/lib/availability'
+import { clientIp, rateLimitOk } from '@/lib/rate-limit'
 import type { BookingFormData, Emirate, ParkingType, SlotTime } from '@/types/booking'
 
 /**
@@ -38,6 +39,16 @@ function appUrl(req: Request): string {
 }
 
 export async function POST(req: Request) {
+  // Anti-abuse: cap booking attempts per IP. Each accepted attempt reserves one
+  // of only 5 daily slots for 30 minutes and opens a live Stripe session, so an
+  // unthrottled flood could squat the whole funnel. Fails open if unavailable.
+  if (!(await rateLimitOk(`booking:${clientIp(req)}`, 6, 60))) {
+    return NextResponse.json(
+      { ok: false, error: 'Too many booking attempts. Please wait a minute and try again.' },
+      { status: 429 },
+    )
+  }
+
   let body: Partial<BookingFormData>
   try {
     body = (await req.json()) as Partial<BookingFormData>

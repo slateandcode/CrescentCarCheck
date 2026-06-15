@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSlotAvailability } from '@/lib/availability'
+import { clientIp, rateLimitOk } from '@/lib/rate-limit'
 import type { DistanceClass } from '@/types/booking'
 
 /**
@@ -25,6 +26,15 @@ function todayISO(): string {
 }
 
 export async function GET(req: Request) {
+  // Anti-abuse: higher burst than the write endpoints (the checkout UI polls
+  // this as the customer browses dates), but still bounded against enumeration.
+  if (!(await rateLimitOk(`avail:${clientIp(req)}`, 60, 60))) {
+    return NextResponse.json(
+      { ok: false, error: 'Too many requests. Please slow down.' },
+      { status: 429 },
+    )
+  }
+
   const params = new URL(req.url).searchParams
   const date = params.get('date') ?? ''
   const distanceParam = params.get('distance') ?? 'normal'
