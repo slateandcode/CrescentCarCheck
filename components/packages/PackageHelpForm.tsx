@@ -142,6 +142,10 @@ export function PackageHelpForm() {
   const [form, setForm] = useState<Form>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
   const [submitted, setSubmitted] = useState(false)
+  // Set when window.open() is blocked (popup blockers / in-app browsers): we keep
+  // the form visible and render a manual "Open WhatsApp" link so the hand-off can
+  // still complete instead of dead-ending on an unconditional success screen.
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null)
 
   const fid = (key: keyof Form) => `${baseId}-${key}`
 
@@ -177,14 +181,23 @@ export function PackageHelpForm() {
     trackEvent(GA_EVENTS.CONTACT_SUBMITTED, { form: 'package_help', reason: form.reason })
     // Open WhatsApp pre-filled with their answers — works without a backend.
     const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(buildWhatsAppText(form))}`
-    window.open(url, '_blank', 'noopener,noreferrer')
-    setSubmitted(true)
+    // window.open() returns null when blocked (popup blockers / in-app browsers).
+    // Only show the success state if the tab actually opened; otherwise keep the
+    // form up and expose a manual link so the hand-off can still complete.
+    const opened = window.open(url, '_blank', 'noopener,noreferrer')
+    if (opened) {
+      setFallbackUrl(null)
+      setSubmitted(true)
+    } else {
+      setFallbackUrl(url)
+    }
   }
 
   const askAgain = () => {
     setSubmitted(false)
     setForm(EMPTY)
     setErrors({})
+    setFallbackUrl(null)
   }
 
   return (
@@ -383,6 +396,24 @@ export function PackageHelpForm() {
                       Or call us directly
                     </a>
                   </div>
+
+                  {fallbackUrl && (
+                    <div
+                      role="alert"
+                      className="mt-4 rounded-input border border-accent/40 bg-accent/5 px-3.5 py-3 text-sm text-light-text"
+                    >
+                      Your browser blocked the WhatsApp pop-up.{' '}
+                      <a
+                        href={fallbackUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-accent underline underline-offset-2"
+                      >
+                        Tap here to open WhatsApp
+                      </a>{' '}
+                      with your details pre-filled.
+                    </div>
+                  )}
 
                   <p className="text-light-text-muted text-xs mt-4 leading-relaxed">
                     Submitting opens WhatsApp with your details pre-filled — your message

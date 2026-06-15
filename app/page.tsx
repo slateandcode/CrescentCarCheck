@@ -1,5 +1,4 @@
 import { Metadata } from 'next'
-import Script from 'next/script'
 import { getLocalBusinessSchema } from '@/lib/structured-data'
 import { HeroSection } from '@/components/home/HeroSection'
 import { TrustBar } from '@/components/home/TrustBar'
@@ -22,10 +21,13 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <Script
-        id="local-business-schema"
+      {/* Native <script> for inert structured data (the Next-recommended way) with
+          `<` escaped so a stray '<' in any field can't break out of the tag. */}
+      <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(getLocalBusinessSchema()) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getLocalBusinessSchema()).replace(/</g, '\\u003c'),
+        }}
       />
       <HeroSection />
       <TrustBar />

@@ -5,6 +5,7 @@ import { Clock, Check, Loader2, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Field, inputBase, fieldBorder, labelClass } from '@/components/ui/Field'
 import { SLOTS } from '@/lib/packages'
+import { dubaiTodayISO } from '@/lib/validation'
 import type { DistanceClass, SlotTime } from '@/types/booking'
 
 interface ScheduleSlotProps {
@@ -30,11 +31,8 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const STRIP_DAYS = 14
 const MAX_DAYS = 60
 
-/** Today in Asia/Dubai (the slot model's timezone) as yyyy-mm-dd — correct
- *  regardless of the visitor's own device timezone. */
-function dubaiTodayISO(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dubai' }).format(new Date())
-}
+// dubaiTodayISO() lives in lib/validation so the form's lower-bound check and the
+// date this component pre-selects share ONE resolver and can never disagree.
 
 /** Add n days to a yyyy-mm-dd string without timezone drift. */
 function addDaysISO(iso: string, n: number): string {
@@ -87,8 +85,9 @@ export function ScheduleSlot({
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const [clearedMessage, setClearedMessage] = useState(false)
-  // Resolved client-side after mount (Dubai tz) — avoids any SSR/timezone drift.
-  const [today, setToday] = useState('')
+  // Resolve "today" (Dubai tz) SYNCHRONOUSLY so the native date input always
+  // renders with its `min` set — never a brief window with no lower bound.
+  const [today] = useState(dubaiTodayISO)
 
   // Keep the latest onChange + current date/slot in refs so the effects can use
   // them without re-running on every parent render. Synced in an effect.
@@ -101,17 +100,16 @@ export function ScheduleSlot({
     dateRef.current = inspectionDate
   })
 
-  // On mount: resolve "today" in Dubai and default the date to it if unset, so
-  // the current day is pre-selected and availability loads immediately. Deferred
-  // to a task so we never call setState synchronously in the effect body.
+  // On mount: default the date to today (already resolved synchronously above) if
+  // it's unset, so the current day is pre-selected and availability loads
+  // immediately. Deferred to a task so we never call setState synchronously in
+  // the effect body (the parent's onChange triggers a state update).
   useEffect(() => {
-    const t = dubaiTodayISO()
     const apply = setTimeout(() => {
-      setToday(t)
-      if (!DATE_RE.test(dateRef.current)) onChangeRef.current({ inspectionDate: t })
+      if (!DATE_RE.test(dateRef.current)) onChangeRef.current({ inspectionDate: today })
     }, 0)
     return () => clearTimeout(apply)
-  }, [])
+  }, [today])
 
   // Long-distance areas are 9:30 AM only. If the customer already had another
   // slot selected, clear it the moment they switch to a long-distance emirate —

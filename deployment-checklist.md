@@ -19,9 +19,13 @@ environment settings (production). See `BACKEND_SETUP.md` for full per-service s
 - [ ] `NEXT_PUBLIC_INSTAGRAM_URL` — optional; footer icon only appears when set
 
 ### Bookings database — Supabase
-- [ ] Create a Supabase project
+This website owns **no migrations**. The `bookings`/contact schema and its RPCs live
+in the **Crescent Car Reports** repo (project `jwslaqufrdoodsxasxnr`) — point this
+site at that same Supabase project. **Do not** `supabase db push` from this repo; see
+`BACKEND_SETUP.md` §1.
+- [ ] Point this site at the same Supabase project as Crescent Car Reports
 - [ ] Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-- [ ] Run the schema in `supabase/migrations/001_bookings.sql` (SQL Editor or `supabase db push`)
+- [ ] Ensure the Reports repo's booking migrations have been applied to that project
 - [ ] Submit a test booking and confirm the row appears in the `bookings` table
 
 > Until configured, the booking form works and returns a reference, but **nothing is saved.**

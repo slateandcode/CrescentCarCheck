@@ -4,9 +4,11 @@ export function getLocalBusinessSchema() {
     '@type': 'LocalBusiness',
     name: 'Crescent Car Check',
     description: 'Professional pre-purchase car inspection service across the UAE.',
-    url: process.env.NEXT_PUBLIC_APP_URL,
-    telephone: process.env.NEXT_PUBLIC_BUSINESS_PHONE,
-    email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL,
+    // Fall back to the same constants as components/layout/Footer.tsx so the
+    // JSON-LD never emits `undefined` when these env vars are unset.
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://crescentcarcheck.com',
+    telephone: process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314',
+    email: process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.com',
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'AE',

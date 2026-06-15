@@ -16,6 +16,9 @@ import type { DistanceClass } from '@/types/booking'
  */
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+/** Furthest bookable date ahead of today — mirrors the checkout UI's date cap
+ *  (ScheduleSlot MAX_DAYS) and the booking validator so the three agree. */
+const MAX_DAYS = 60
 
 /** Local yyyy-mm-dd for "today" (UAE has no DST, server may be UTC — close enough
  *  for a not-in-the-past guard; the API also relies on the DB for real conflicts). */
@@ -23,6 +26,13 @@ function todayISO(): string {
   const d = new Date()
   const tz = d.getTimezoneOffset() * 60000
   return new Date(d.getTime() - tz).toISOString().slice(0, 10)
+}
+
+/** Add n days to a yyyy-mm-dd string without timezone drift. */
+function addDaysISO(iso: string, n: number): string {
+  const d = new Date(`${iso}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d.toISOString().slice(0, 10)
 }
 
 export async function GET(req: Request) {
@@ -52,6 +62,11 @@ export async function GET(req: Request) {
   }
   if (date < todayISO()) {
     return NextResponse.json({ ok: false, error: 'Date is in the past.' }, { status: 400 })
+  }
+  // Far-future upper bound — reject dates the UI could never offer, so enumeration
+  // can't probe arbitrarily distant dates.
+  if (date > addDaysISO(todayISO(), MAX_DAYS)) {
+    return NextResponse.json({ ok: false, error: 'Date is too far in the future.' }, { status: 400 })
   }
 
   if (distanceParam !== 'normal' && distanceParam !== 'long') {

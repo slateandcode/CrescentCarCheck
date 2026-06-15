@@ -156,6 +156,25 @@ export function CheckoutForm() {
         checkoutUrl?: string
         bookingId?: string
         error?: string
+        errors?: BookingFormErrors
+      }
+
+      // 422 = server-side field validation rejected the payload (the server runs
+      // the same validateForm). Surface the per-field errors and jump to the
+      // first one, mirroring the local-validation path above, instead of showing
+      // a generic banner.
+      if (res.status === 422 && data.errors && typeof data.errors === 'object') {
+        setSubmitting(false)
+        setErrors(data.errors)
+        const firstKey = Object.keys(data.errors)[0]
+        if (firstKey) {
+          const el = document.getElementById(`field-${baseId}-${firstKey}`)
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            el.querySelector<HTMLElement>('input, select, textarea, button')?.focus()
+          }
+        }
+        return
       }
 
       // 409 = the slot was taken between our availability check and submit.
