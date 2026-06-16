@@ -44,7 +44,7 @@ function Squiggle() {
       aria-hidden="true"
     >
       <path
-        d="M4 14c6-12 14 8 22-4s16 16 24 4 14 8 26-4"
+        d="M8 12 H72"
         stroke="#FFC600"
         strokeWidth="3"
         strokeLinecap="round"

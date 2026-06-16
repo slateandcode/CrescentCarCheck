@@ -26,18 +26,18 @@ export function WhyInspectionMatters() {
   const ref = useReveal<HTMLDivElement>()
 
   return (
-    <section className="bg-light-bg section-padding">
+    <section className="bg-background section-padding">
       <div ref={ref} className="reveal container-wide">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           <div>
-            <h2 className="text-display-sm sm:text-display-md md:text-display-lg font-bold text-light-text leading-tight">
+            <h2 className="text-display-sm sm:text-display-md md:text-display-lg font-bold text-text-primary leading-tight">
               Why a Car Inspection Matters{' '}
               <span className="underline decoration-accent decoration-[3px] underline-offset-4">
                 More Than You Think
               </span>
             </h2>
           </div>
-          <p className="text-light-text-secondary text-base md:text-lg leading-relaxed lg:pt-6">
+          <p className="text-text-secondary text-base md:text-lg leading-relaxed lg:pt-6">
             A used car can look perfect at first glance, but appearances mislead. Hidden accident
             damage, engine wear, or odometer rollback can turn a promising deal into an expensive
             mistake. Our on-site inspection and same-day digital report give you the full picture
@@ -49,13 +49,13 @@ export function WhyInspectionMatters() {
           {REASONS.map((reason) => (
             <div
               key={reason.title}
-              className="bg-light-card border border-light-border rounded-card p-6 md:p-7 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] transition-all duration-300"
+              className="bg-card border border-border rounded-card p-6 md:p-7 shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.5)] transition-all duration-300"
             >
               <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mb-5">
                 <reason.Icon className="text-background w-6 h-6" aria-hidden="true" />
               </div>
-              <h3 className="text-light-text font-bold text-lg">{reason.title}</h3>
-              <p className="text-light-text-secondary text-sm mt-2 leading-relaxed">{reason.text}</p>
+              <h3 className="text-text-primary font-bold text-lg">{reason.title}</h3>
+              <p className="text-text-secondary text-sm mt-2 leading-relaxed">{reason.text}</p>
             </div>
           ))}
         </div>
@@ -63,7 +63,7 @@ export function WhyInspectionMatters() {
         <div className="mt-10 text-center">
           <Link
             href="/packages"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-light-text hover:gap-2.5 transition-all duration-200"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-text-primary hover:gap-2.5 transition-all duration-200"
           >
             Compare packages
             <ArrowRight className="w-4 h-4 text-accent" aria-hidden="true" />
