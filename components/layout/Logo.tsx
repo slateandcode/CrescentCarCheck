@@ -9,7 +9,7 @@ export function Logo({ className }: LogoProps) {
   return (
     <span
       className={cn(
-        'relative block h-14 w-[200px] md:h-16 md:w-[228px]',
+        'relative block h-16 w-[228px] md:h-20 md:w-[288px]',
         '[filter:drop-shadow(0_2px_10px_rgba(255,198,0,0.35))]',
         className
       )}
@@ -18,7 +18,7 @@ export function Logo({ className }: LogoProps) {
         src="/Logo Non BG.png"
         alt="Crescent Car Check"
         fill
-        sizes="(min-width: 640px) 200px, 170px"
+        sizes="(min-width: 768px) 288px, 228px"
         priority
         className="object-contain object-left"
       />

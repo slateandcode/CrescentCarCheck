@@ -63,7 +63,7 @@ export function HeroSection() {
         The inspector photo reads clearly up top; the gold card sits below and
         overlaps the image only slightly, so it never blocks the subject.
       */}
-      <div className="lg:hidden container-wide pt-20 sm:pt-24 pb-12">
+      <div className="lg:hidden container-wide pt-24 sm:pt-28 pb-12">
         {/*
           Banner is a wide ~21:9 landscape with the inspector + car on the LEFT,
           so we frame it in a rounded card and bias the crop left (object-left)

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { FileText, Camera, CheckCircle2, Clock } from 'lucide-react'
+import Image from 'next/image'
+import { FileText, Camera, CheckCircle2, Lock } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
+import { cn } from '@/lib/utils'
+import { REPORT_PAGES, FREE_PAGES, LOCKED_PLACEHOLDER } from '@/lib/sample-report-pages'
 
 export const metadata: Metadata = {
-  title: 'Sample Inspection Report',
+  title: 'Report Preview',
   description:
     'Preview what a Crescent Car Check inspection report looks like — clear status on every system, photos of every finding, and a plain-English verdict.',
 }
@@ -27,6 +30,19 @@ const WHAT_TO_EXPECT = [
   },
 ]
 
+// The pages a visitor can read in full, plus any locked teaser pages. When real
+// inner pages haven't been added yet, a blurred placeholder stands in so the
+// "locked" concept reads as intentional.
+const lockedRealPages = REPORT_PAGES.slice(FREE_PAGES)
+const previewPages = [
+  ...REPORT_PAGES.slice(0, FREE_PAGES).map((p) => ({ ...p, locked: false })),
+  ...(lockedRealPages.length > 0
+    ? lockedRealPages.map((p) => ({ ...p, locked: true }))
+    : LOCKED_PLACEHOLDER
+      ? [{ src: LOCKED_PLACEHOLDER, alt: '', locked: true }]
+      : []),
+]
+
 export default function SampleReportPage() {
   return (
     <>
@@ -34,15 +50,15 @@ export default function SampleReportPage() {
         <div className="container-wide">
           <div className="max-w-3xl">
             <p className="text-accent font-bold tracking-[0.2em] uppercase text-sm">
-              Sample Report
+              Report Preview
             </p>
             <h1 className="text-display-md sm:text-display-lg md:text-display-xl font-black text-text-primary leading-[1.05] md:leading-[1.02] mt-3 break-words">
               See Exactly What You&apos;ll <span className="text-accent">Receive</span>
             </h1>
             <p className="text-text-secondary text-base md:text-lg mt-5 max-w-2xl leading-relaxed">
-              Every inspection ends with a detailed digital report. We&apos;re putting the
-              finishing touches on a downloadable sample you can browse end-to-end — it&apos;ll
-              land here shortly. In the meantime, here&apos;s what every report includes.
+              Every inspection ends with a detailed digital report. Here&apos;s a preview of the
+              real thing — browse the opening page, then book an inspection to unlock the full
+              report on your own car.
             </p>
           </div>
         </div>
@@ -65,30 +81,59 @@ export default function SampleReportPage() {
             ))}
           </div>
 
-          {/* Placeholder for the downloadable sample report */}
-          <div className="mt-10 rounded-card-lg border border-dashed border-light-border bg-light-card p-8 sm:p-10 text-center">
-            <div className="w-14 h-14 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto">
-              <Clock className="w-7 h-7 text-accent" aria-hidden="true" />
-            </div>
-            <h2 className="text-light-text text-xl sm:text-2xl font-bold mt-5">
-              Full sample report coming soon
-            </h2>
-            <p className="text-light-text-secondary text-sm md:text-base mt-3 max-w-xl mx-auto leading-relaxed">
-              A complete, anonymised sample report is on its way. Want to see one sooner, or
-              have a specific car in mind? Message us and we&apos;ll walk you through it.
-            </p>
-
-            <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-              <ButtonLink href="/packages" size="lg" arrow fullWidth className="sm:w-auto">
-                View inspection packages
-              </ButtonLink>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-button font-semibold px-6 py-3 text-base w-full sm:w-auto bg-light-surface text-light-text border border-light-border hover:border-light-border-hover transition-colors duration-200"
+          {/* Report preview: opening page(s) clear, the rest blurred behind a CTA. */}
+          <div className="mt-12 flex flex-col items-center gap-6">
+            {previewPages.map((page, i) => (
+              <div
+                key={`${page.src}-${i}`}
+                className="relative w-full max-w-[480px] aspect-[210/297] rounded-card-lg overflow-hidden border border-light-border shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
               >
-                Ask us a question
-              </Link>
-            </div>
+                <Image
+                  src={page.src}
+                  alt={page.locked ? '' : page.alt}
+                  fill
+                  sizes="(min-width: 768px) 480px, 90vw"
+                  className={cn(
+                    'object-cover',
+                    page.locked && 'blur-md scale-110 select-none pointer-events-none'
+                  )}
+                />
+
+                {!page.locked && (
+                  <span className="absolute right-3 top-3 rounded-full bg-black/40 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/85 backdrop-blur-sm">
+                    Page {i + 1}
+                  </span>
+                )}
+
+                {/* The first locked page carries the unlock CTA. */}
+                {page.locked && i === FREE_PAGES && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-light-bg/40 backdrop-blur-[2px]">
+                    <div className="text-center px-6">
+                      <div className="w-14 h-14 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center mx-auto">
+                        <Lock className="w-7 h-7 text-accent" aria-hidden="true" />
+                      </div>
+                      <h3 className="text-light-text text-xl sm:text-2xl font-bold mt-4">
+                        Unlock the full report
+                      </h3>
+                      <p className="text-light-text-secondary text-sm mt-2 max-w-xs mx-auto leading-relaxed">
+                        Book an inspection and receive your own detailed, photo-backed report —
+                        delivered the same day.
+                      </p>
+                      <ButtonLink href="/packages" size="lg" arrow className="mt-6">
+                        Book an inspection
+                      </ButtonLink>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 rounded-button font-semibold px-6 py-3 text-base bg-light-surface text-light-text border border-light-border hover:border-light-border-hover transition-colors duration-200"
+            >
+              Have a specific car in mind? Ask us
+            </Link>
           </div>
         </div>
       </section>

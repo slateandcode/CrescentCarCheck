@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from './Logo'
+import { InstagramGlyph, TikTokGlyph, INSTAGRAM_URL, TIKTOK_URL } from './SocialIcons'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
@@ -89,7 +90,7 @@ export function Navbar() {
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20 gap-3">
+          <div className="flex items-center justify-between h-20 md:h-24 gap-3">
             <Link
               href="/"
               aria-label="Crescent Car Check home"
@@ -154,7 +155,7 @@ export function Navbar() {
           aria-label="Site menu"
           className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-in-right lg:hidden"
         >
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
+          <div className="flex items-center justify-between h-20 px-4 border-b border-border">
             <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Crescent Car Check home">
               <Logo />
             </Link>
@@ -191,6 +192,32 @@ export function Navbar() {
           </nav>
 
           <div className="p-6 border-t border-border">
+            {(INSTAGRAM_URL || TIKTOK_URL) && (
+              <div className="flex items-center justify-center gap-3 mb-5">
+                {INSTAGRAM_URL && (
+                  <a
+                    href={INSTAGRAM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center text-text-primary hover:bg-accent hover:text-background hover:border-accent transition-colors duration-200"
+                  >
+                    <InstagramGlyph className="w-5 h-5" />
+                  </a>
+                )}
+                {TIKTOK_URL && (
+                  <a
+                    href={TIKTOK_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TikTok"
+                    className="w-11 h-11 rounded-full bg-card border border-border flex items-center justify-center text-text-primary hover:bg-accent hover:text-background hover:border-accent transition-colors duration-200"
+                  >
+                    <TikTokGlyph className="w-5 h-5" />
+                  </a>
+                )}
+              </div>
+            )}
             <Link
               href="/packages"
               onClick={() => setMobileOpen(false)}

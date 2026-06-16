@@ -33,6 +33,7 @@ export default function HomePage() {
       <TrustBar />
       <InspectionHighlights />
       <PackagesSection />
+      <RecentlyInspected />
       <HowItWorks />
       <WhyInspectionMatters />
       <SampleReport />
@@ -43,7 +44,6 @@ export default function HomePage() {
         </div>
       </section>
       <Testimonials />
-      <RecentlyInspected />
       <FAQ />
       <CTABanner />
     </>

@@ -51,7 +51,7 @@ export function SampleReport() {
 
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <ButtonLink href="/sample-report" size="lg" arrow>
-              View Sample Report
+              View Report Preview
             </ButtonLink>
             <Link
               href="/packages"

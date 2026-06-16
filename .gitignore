@@ -45,6 +45,11 @@ brief.txt
 brief_extract.txt
 /brief_pages/
 
+# raw inspection footage — heavy ProRes/HEVC originals (40–65MB each). Only the
+# transcoded web MP4s under public/inspections are committed + deployed.
+/public/Videos/
+*.mov
+
 # vercel
 .vercel
 
