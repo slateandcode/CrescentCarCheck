@@ -27,16 +27,8 @@ export interface InspectedCar {
   finding?: string
 }
 
+// Order is the left-to-right carousel order (client-specified, 2026-06-16).
 export const INSPECTED_CARS: InspectedCar[] = [
-  {
-    slug: 'nissan-maxima',
-    make: 'Nissan',
-    model: 'Maxima',
-    image: '/cars/Nissan Maxima.png',
-    video: '/inspections/nissan-maxima.mp4',
-    crescentScore: 44, // confirmed from client mockup
-    recommendation: 'avoid', // confirmed from client mockup
-  },
   {
     slug: 'subaru-wrx',
     make: 'Subaru',
@@ -44,16 +36,16 @@ export const INSPECTED_CARS: InspectedCar[] = [
     image: '/cars/Subaru WRX.png',
     // No inspection video supplied for this car.
     crescentScore: 62, // confirmed from client mockup
-    recommendation: 'avoid', // confirmed from client mockup
+    recommendation: 'avoid', // client-confirmed
   },
   {
-    slug: 'bentley-continental',
-    make: 'Bentley',
-    model: 'Continental GT',
-    image: '/cars/Bentley Continental.png',
-    video: '/inspections/bentley-continental.mp4',
-    crescentScore: 88, // TODO real %
-    recommendation: 'buy', // client-confirmed
+    slug: 'mustang',
+    make: 'Ford',
+    model: 'Mustang',
+    image: '/cars/Mustang.png',
+    video: '/inspections/mustang.mp4',
+    crescentScore: 47, // TODO real %
+    recommendation: 'avoid', // client-confirmed
   },
   {
     slug: 'range-rover',
@@ -74,22 +66,13 @@ export const INSPECTED_CARS: InspectedCar[] = [
     recommendation: 'negotiate', // client-confirmed
   },
   {
-    slug: 'gmc-yukon',
-    make: 'GMC',
-    model: 'Yukon',
-    image: '/cars/GMC Yukon.png',
-    video: '/inspections/gmc-yukon.mp4',
-    crescentScore: 84, // TODO real %
-    recommendation: 'buy', // client-confirmed
-  },
-  {
-    slug: 'mustang',
-    make: 'Ford',
-    model: 'Mustang',
-    image: '/cars/Mustang.png',
-    video: '/inspections/mustang.mp4',
-    crescentScore: 47, // TODO real %
-    recommendation: 'avoid', // client-confirmed
+    slug: 'nissan-maxima',
+    make: 'Nissan',
+    model: 'Maxima',
+    image: '/cars/Nissan Maxima.png',
+    video: '/inspections/nissan-maxima.mp4',
+    crescentScore: 44, // confirmed from client mockup
+    recommendation: 'avoid', // confirmed from client mockup
   },
   {
     slug: 'nissan-kicks',
@@ -99,5 +82,23 @@ export const INSPECTED_CARS: InspectedCar[] = [
     video: '/inspections/nissan-kicks.mp4',
     crescentScore: 53, // TODO real %
     recommendation: 'avoid', // client-confirmed
+  },
+  {
+    slug: 'bentley-continental',
+    make: 'Bentley',
+    model: 'Continental GT',
+    image: '/cars/Bentley Continental.png',
+    video: '/inspections/bentley-continental.mp4',
+    crescentScore: 88, // TODO real %
+    recommendation: 'buy', // client-confirmed
+  },
+  {
+    slug: 'gmc-yukon',
+    make: 'GMC',
+    model: 'Yukon',
+    image: '/cars/GMC Yukon.png',
+    video: '/inspections/gmc-yukon.mp4',
+    crescentScore: 84, // TODO real %
+    recommendation: 'buy', // client-confirmed
   },
 ]
