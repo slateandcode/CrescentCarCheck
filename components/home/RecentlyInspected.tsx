@@ -46,12 +46,17 @@ function CarCard({ car, onPlay }: { car: InspectedCar; onPlay: (car: InspectedCa
 
   const inner = (
     <>
-      <div className="relative aspect-square bg-surface overflow-hidden">
+      <div className="relative bg-surface overflow-hidden">
+        {/* Intrinsic-size square image (the source PNGs are 1:1). Deriving the
+            height from the image itself — rather than CSS aspect-ratio + a
+            `fill` overlay — means the thumbnail can never collapse to zero
+            height on browsers with flaky aspect-ratio support (older iOS). */}
         <Image
           src={car.image}
           alt={`${car.make} ${car.model}`}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          width={800}
+          height={800}
+          className="block w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 78vw, (max-width: 1024px) 32vw, 18vw"
         />
 
