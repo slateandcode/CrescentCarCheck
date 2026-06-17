@@ -46,11 +46,16 @@ function CarCard({ car, onPlay }: { car: InspectedCar; onPlay: (car: InspectedCa
 
   const inner = (
     <>
-      <div className="relative aspect-square bg-surface overflow-hidden">
-        {/* Fixed-aspect square frame: every thumbnail renders at an identical
-            size regardless of any source-image quirk, with object-cover cropping
-            to fill. This keeps the mobile carousel uniform (the source PNGs are
-            1:1, so nothing is actually cropped). */}
+      {/* Square thumbnail frame via the padding-bottom ratio hack (NOT CSS
+          `aspect-ratio`): padding-bottom is a % of the element's width, so the
+          box is always a perfect square and can never collapse to zero height —
+          including on iOS Safari / in-app webviews, where `aspect-ratio` was
+          being ignored and the photo disappeared. The `fill` image's
+          height:100% resolves against this padding box, so it fills the square. */}
+      <div
+        className="relative w-full bg-surface overflow-hidden"
+        style={{ paddingBottom: '100%' }}
+      >
         <Image
           src={car.image}
           alt={`${car.make} ${car.model}`}
