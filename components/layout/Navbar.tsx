@@ -117,12 +117,37 @@ export function Navbar() {
               ))}
             </nav>
 
-            <Link
-              href="/packages"
-              className="hidden lg:inline-flex bg-accent text-background font-semibold text-sm px-5 py-2.5 rounded-button hover:bg-accent-hover transition-colors duration-200"
-            >
-              Book Inspection
-            </Link>
+            {/* Desktop: social icons grouped with the Book button on the right */}
+            <div className="hidden lg:flex items-center gap-3">
+              {INSTAGRAM_URL && (
+                <a
+                  href={INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-text-primary hover:bg-accent hover:text-background hover:border-accent transition-colors duration-200"
+                >
+                  <InstagramGlyph className="w-5 h-5" />
+                </a>
+              )}
+              {TIKTOK_URL && (
+                <a
+                  href={TIKTOK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center text-text-primary hover:bg-accent hover:text-background hover:border-accent transition-colors duration-200"
+                >
+                  <TikTokGlyph className="w-5 h-5" />
+                </a>
+              )}
+              <Link
+                href="/packages"
+                className="inline-flex bg-accent text-background font-semibold text-sm px-5 py-2.5 rounded-button hover:bg-accent-hover transition-colors duration-200"
+              >
+                Book Inspection
+              </Link>
+            </div>
 
             {/* Mobile / tablet: compact BOOK pill + hamburger */}
             <div className="flex items-center gap-2 lg:hidden">

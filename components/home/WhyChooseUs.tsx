@@ -15,13 +15,13 @@ const FEATURES: Feature[] = [
   {
     icon: '/why-us/underbody.png',
     title: "Underbody Access Other Companies Can't Always Offer",
-    text: 'Not every inspection company can properly lift low-clearance vehicles on-site. Our specialised custom low-approach race ramps allow us to safely lift any car, from everyday SUVs to luxury sports cars, so we can properly inspect underneath for leaks, scraping, damage and repair signs.',
+    text: 'Many inspection companies struggle to inspect low-clearance cars properly on-site. Our specialised low-approach ramps help us safely inspect underneath any car for leaks, scraping, damage and repair signs.',
     featured: true,
   },
   {
-    icon: '/why-us/customer-service.png',
-    title: 'Customer Service That Works Hard for You',
-    text: 'Buying a used car can be stressful. We make the process simple, responsive and clear — from booking the inspection to helping you understand the findings.',
+    icon: '/why-us/technology.png',
+    title: 'Technology-Backed Reports',
+    text: 'Our inspectors use a proprietary inspection app to record checks, photos and findings on-site. This helps us deliver consistent, detailed digital reports with a fast turnaround.',
   },
   {
     icon: '/why-us/independent.png',
@@ -35,13 +35,13 @@ const FEATURES: Feature[] = [
   },
   {
     icon: '/why-us/evidence.png',
-    title: 'Clear Evidence, Not Vague Opinions',
-    text: 'We show you what we find with photos, readings and clear notes, so you are not relying on a vague "good condition" or "bad condition" opinion.',
+    title: 'Clear Evidence, Clear Recommendation',
+    text: 'We back our findings with photos, readings and clear notes, so you understand exactly what we saw — along with a clear recommendation on whether to buy, negotiate or walk away.',
   },
   {
-    icon: '/why-us/findings.png',
-    title: 'Clear Findings, Explained Properly',
-    text: "We don't just send a confusing checklist and leave you to figure it out. Our reports are written clearly, with photos of visible faults, and our team helps you understand the key findings so you can decide whether to buy, negotiate or walk away.",
+    icon: '/why-us/customer-service.png',
+    title: 'Customer Service That Works Hard for You',
+    text: 'Buying a used car can be stressful. We make the process simple, responsive and clear — from booking the inspection to helping you understand the findings.',
   },
 ]
 

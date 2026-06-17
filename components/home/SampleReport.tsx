@@ -17,34 +17,33 @@ export function SampleReport() {
       >
         <div>
           <h2 className="text-display-sm md:text-display-md font-bold text-light-text">
-            See Exactly What You&apos;re Buying
+            Preview the Report You&apos;ll Receive
           </h2>
           <p className="text-light-text-secondary leading-relaxed mt-4">
-            Every inspection ends with a detailed digital report: clear status on every system,
-            photos of anything worth flagging, and a plain-English summary you can hand straight to
-            the seller. Delivered the same day.
+            You&apos;ll get a clear breakdown of the car&apos;s condition, photos of any issues
+            found, and a plain-English recommendation on whether to buy, negotiate or avoid.
           </p>
 
           <ul className="space-y-3 mt-6">
             <li className="flex items-start gap-3">
               <FileText className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-light-text-secondary">
-                <span className="font-semibold text-light-text">PDF + web report</span>, shareable,
-                printable, searchable.
+                <span className="font-semibold text-light-text">PDF report</span>, easy to view,
+                share and keep.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <Camera className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-light-text-secondary">
-                <span className="font-semibold text-light-text">Photos of every finding</span>, no
-                vague claims, just evidence.
+                <span className="font-semibold text-light-text">Photos &amp; explanations</span>,
+                clear evidence for flagged issues.
               </span>
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
               <span className="text-light-text-secondary">
-                <span className="font-semibold text-light-text">Pass / Watch / Fail</span> on every
-                category, no guesswork.
+                <span className="font-semibold text-light-text">Pass / Minor Fail / Major Fail</span>,
+                simple ratings with no guesswork.
               </span>
             </li>
           </ul>

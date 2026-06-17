@@ -34,7 +34,7 @@ export const INSPECTED_CARS: InspectedCar[] = [
     make: 'Subaru',
     model: 'WRX',
     image: '/cars/Subaru WRX.png',
-    // No inspection video supplied for this car.
+    video: '/inspections/subaru-wrx.mp4',
     crescentScore: 62, // confirmed from client mockup
     recommendation: 'avoid', // client-confirmed
   },

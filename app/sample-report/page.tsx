@@ -15,18 +15,18 @@ export const metadata: Metadata = {
 const WHAT_TO_EXPECT = [
   {
     Icon: CheckCircle2,
-    title: 'Pass / Watch / Fail on every system',
-    body: 'A clear verdict on each category — engine, transmission, brakes, body, electrics and more — so nothing is left to guesswork.',
+    title: 'Pass / Minor Fail / Major Fail',
+    body: 'Each inspected item is clearly marked, so you can quickly understand what passed, what needs attention, and what could be a serious concern.',
   },
   {
     Icon: Camera,
-    title: 'Photos of every finding',
-    body: 'No vague claims. Every flagged issue is backed with a photo so you can see exactly what we saw.',
+    title: 'Photos & Explanations',
+    body: 'Where an issue is found, we include supporting photos and clear explanations so you can understand exactly what our inspector saw.',
   },
   {
     Icon: FileText,
-    title: 'A plain-English summary',
-    body: 'A buy / negotiate / avoid recommendation you can hand straight to the seller, delivered the same day.',
+    title: 'Score & Recommendation',
+    body: 'We assign an overall Crescent Score, score each key section of the vehicle, and give a clear recommendation on whether to buy, negotiate or avoid.',
   },
 ]
 
@@ -53,12 +53,12 @@ export default function SampleReportPage() {
               Report Preview
             </p>
             <h1 className="text-display-md sm:text-display-lg md:text-display-xl font-black text-text-primary leading-[1.05] md:leading-[1.02] mt-3 break-words">
-              See Exactly What You&apos;ll <span className="text-accent">Receive</span>
+              Preview the Report You&apos;ll <span className="text-accent">Receive</span>
             </h1>
             <p className="text-text-secondary text-base md:text-lg mt-5 max-w-2xl leading-relaxed">
-              Every inspection ends with a detailed digital report. Here&apos;s a preview of the
-              real thing — browse the opening page, then book an inspection to unlock the full
-              report on your own car.
+              Every Crescent Car Check inspection ends with a detailed digital report designed to
+              make your buying decision clearer. Here&apos;s a preview of the real thing — browse the
+              opening pages, then book an inspection to unlock the full report on your dream car.
             </p>
           </div>
         </div>
