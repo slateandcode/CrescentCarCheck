@@ -13,22 +13,31 @@ export interface ReportPage {
   alt: string
 }
 
-/** Real, unlocked pages the visitor can read in full. */
+// Pages from a real inspection report (ref CCR-2026-0014, 2016 Challenger).
+// Confidential fields (customer name/phone/email, inspector, VIN, plate) are
+// permanently blurred into the page-1/page-2 image files — not just CSS — since
+// these pages render in full to the public. Page 3 is shown blurred (locked).
+/** Real pages: the first FREE_PAGES render clearly, the rest render locked/blurred. */
 export const REPORT_PAGES: ReportPage[] = [
   {
-    src: '/sample-report-cover.jpg',
+    src: '/sample-report/page-1.jpg',
     alt: 'Crescent Car Check inspection report — cover page',
   },
-  // TODO: append real inner pages here as the client provides them, e.g.
-  // { src: '/sample-report/page-2.jpg', alt: 'Inspection report — summary page' },
+  {
+    src: '/sample-report/page-2.jpg',
+    alt: 'Crescent Car Check inspection report — vehicle summary page',
+  },
+  {
+    src: '/sample-report/page-3.jpg',
+    alt: 'Crescent Car Check inspection report — executive summary page',
+  },
 ]
 
 /** How many pages from REPORT_PAGES render clearly before the lock kicks in. */
-export const FREE_PAGES = 1
+export const FREE_PAGES = 2
 
 /**
- * Placeholder image used (blurred) for the locked teaser page when there are no
- * real inner pages yet. Set to null once REPORT_PAGES has more than FREE_PAGES
- * real entries and you no longer want a duplicate placeholder.
+ * Fallback teaser image used (blurred) only when REPORT_PAGES has no real pages
+ * beyond FREE_PAGES. Now null because page 3 is a real locked page.
  */
-export const LOCKED_PLACEHOLDER: string | null = '/sample-report-cover.jpg'
+export const LOCKED_PLACEHOLDER: string | null = null
