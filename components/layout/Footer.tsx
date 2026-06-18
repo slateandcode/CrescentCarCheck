@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Phone, Mail, MapPin } from 'lucide-react'
+import { telHref } from '@/lib/utils'
 import { Logo } from './Logo'
 import {
   InstagramGlyph,
@@ -107,7 +108,7 @@ export function Footer() {
             <h3 className={headingClass}>CONTACT</h3>
             <ul className="space-y-3">
               <li>
-                <a href={`tel:${PHONE}`} className={`${linkClass} flex items-center gap-2`}>
+                <a href={telHref(PHONE)} className={`${linkClass} flex items-center gap-2`}>
                   <Phone className="w-4 h-4 text-accent flex-shrink-0" aria-hidden="true" />
                   {PHONE}
                 </a>

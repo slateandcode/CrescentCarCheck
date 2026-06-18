@@ -18,8 +18,23 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+// Build metadataBase defensively: a bare domain pasted into the env UI (no
+// scheme) would otherwise make `new URL()` throw at module load and break EVERY
+// route. Prepend https:// when missing, and fall back to the canonical URL if
+// the value is still unparseable.
+function resolveMetadataBase(): URL {
+  const fallback = 'https://crescentcarcheck.com'
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  const candidate = raw ? (/^https?:\/\//i.test(raw) ? raw : `https://${raw}`) : fallback
+  try {
+    return new URL(candidate)
+  } catch {
+    return new URL(fallback)
+  }
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://crescentcarcheck.com'),
+  metadataBase: resolveMetadataBase(),
   title: {
     default: 'Crescent Car Check | Professional Car Inspections in UAE',
     template: '%s | Crescent Car Check',

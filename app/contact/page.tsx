@@ -3,6 +3,7 @@ import { MessageCircle, Phone, Mail, Clock, MapPin, ShieldCheck } from 'lucide-r
 import { ButtonLink } from '@/components/ui/ButtonLink'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { CTABanner } from '@/components/home/CTABanner'
+import { telHref } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -28,7 +29,7 @@ const CONTACT_METHODS = [
     Icon: Phone,
     title: 'Phone',
     value: BUSINESS_PHONE,
-    href: `tel:${BUSINESS_PHONE}`,
+    href: telHref(BUSINESS_PHONE),
     cta: 'Call now',
     blurb: 'Prefer to talk it through? Calls are answered during working hours.',
     external: false,

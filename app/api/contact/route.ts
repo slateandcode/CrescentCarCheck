@@ -3,7 +3,11 @@ import { notifyContactMessage } from '@/lib/email'
 import { createServerClient, isSupabaseConfigured } from '@/lib/supabase/server'
 import { clientIp, rateLimitOk } from '@/lib/rate-limit'
 
-/** Saves the contact message so it's never lost if email delivery fails. Best-effort. */
+/**
+ * Saves the contact message so it's never lost if email delivery fails. Reports
+ * its outcome ('skipped' when Supabase isn't configured) so the route can avoid
+ * showing a false success when nothing actually persisted the message.
+ */
 async function saveContactMessage(msg: {
   name: string
   email: string
@@ -13,8 +17,8 @@ async function saveContactMessage(msg: {
   carModel?: string
   carYear?: string
   message: string
-}): Promise<void> {
-  if (!isSupabaseConfigured()) return
+}): Promise<'ok' | 'skipped' | 'failed'> {
+  if (!isSupabaseConfigured()) return 'skipped'
   try {
     const { error } = await createServerClient()
       .from('contact_messages')
@@ -29,8 +33,10 @@ async function saveContactMessage(msg: {
         message: msg.message,
       })
     if (error) throw error
+    return 'ok'
   } catch (err) {
     console.error('[contact] failed to save message (continuing to email)', err)
+    return 'failed'
   }
 }
 
@@ -146,8 +152,21 @@ export async function POST(req: Request) {
   }
 
   // Save first (so nothing is lost if email fails), then notify the owner.
-  await saveContactMessage(payload)
-  await notifyContactMessage(payload)
+  const saved = await saveContactMessage(payload)
+  const notified = await notifyContactMessage(payload)
+
+  // If at least one backend is configured but EVERY configured path failed, the
+  // message was neither stored nor delivered — surface a retry instead of a
+  // false "Message sent". When nothing is configured (dev/preview) keep the
+  // best-effort ok:true so the form still works.
+  const anyConfigured = saved !== 'skipped' || notified !== 'skipped'
+  const anySucceeded = saved === 'ok' || notified === 'ok'
+  if (anyConfigured && !anySucceeded) {
+    return NextResponse.json(
+      { ok: false, error: 'We could not send your message right now. Please try again or reach us on WhatsApp.' },
+      { status: 502 },
+    )
+  }
 
   return NextResponse.json({ ok: true })
 }

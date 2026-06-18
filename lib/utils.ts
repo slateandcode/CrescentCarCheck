@@ -21,3 +21,13 @@ export function formatShortDate(dateStr: string): string {
 export function stripCountryCode(phone: string): string {
   return phone.replace(/^\+971/, '').replace(/^0/, '').trim()
 }
+
+/**
+ * Build a dialable `tel:` href from a (possibly formatted) phone string. RFC 3966
+ * doesn't allow raw spaces, and some mobile dialers / in-app webviews truncate or
+ * mis-parse at the space — so strip everything except digits and a leading +.
+ * Keep the formatted string for DISPLAY; only the href needs normalising.
+ */
+export function telHref(phone: string): string {
+  return `tel:${phone.replace(/[^+\d]/g, '')}`
+}

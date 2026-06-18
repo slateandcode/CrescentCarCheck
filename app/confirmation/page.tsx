@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { CheckCircle2, MessageCircle, Phone, Mail, ArrowRight } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
 import { ConfirmationDetails } from '@/components/checkout/ConfirmationDetails'
+import { telHref } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Booking Received',
@@ -129,7 +130,7 @@ export default function ConfirmationPage() {
 
             <ul className="space-y-3">
               <ContactRow
-                href={`tel:${BUSINESS_PHONE}`}
+                href={telHref(BUSINESS_PHONE)}
                 Icon={Phone}
                 label="Call us"
                 value={BUSINESS_PHONE}

@@ -17,9 +17,15 @@ import type { Booking } from '@/types/booking'
  *
  * - Reads the RAW body (required for signature verification).
  * - Verifies STRIPE_WEBHOOK_SECRET.
- * - checkout.session.completed → booking becomes paid + "New" (paid_new) via the
- *   confirm_booking_paid RPC, then owner/customer emails + a tentative calendar
- *   hold are sent.
+ * - checkout.session.completed (when payment_status is 'paid') → booking becomes
+ *   paid + "New" (paid_new) via the confirm_booking_paid RPC, then owner/customer
+ *   emails + a tentative calendar hold are sent. A 'completed' event for a
+ *   delayed-notification method (Tabby/BNPL) arrives 'unpaid' and is deferred.
+ * - checkout.session.async_payment_succeeded / async_payment_failed → handle a
+ *   delayed-notification payment (settle / free the slot). INERT today: the
+ *   Checkout session is card-only (lib/stripe.ts sets no payment_method_types),
+ *   so these never fire. Before enabling a BNPL method (e.g. Tabby), extend
+ *   HOLD_MINUTES first — see the async_payment_succeeded handler for why.
  * - checkout.session.expired / payment_intent.payment_failed → booking cancelled,
  *   freeing the window.
  *
@@ -62,7 +68,33 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object
-        await handlePaid(session)
+        // Only fulfil once the payment has actually settled. Standard card
+        // payments are 'paid' the moment the session completes; delayed-
+        // notification methods (e.g. Tabby/BNPL, common in the UAE) arrive here
+        // as 'unpaid' and settle later via async_payment_succeeded — fulfilling
+        // now would confirm a booking + email the customer before money lands.
+        if (session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
+          await handlePaid(session)
+        }
+        break
+      }
+      case 'checkout.session.async_payment_succeeded': {
+        // A delayed-notification payment settled. confirm_booking_paid is
+        // idempotent on a still-pending hold, so this safely confirms it.
+        // ⚠️ This is INERT today (card-only Checkout). Before enabling any BNPL
+        // method, extend the 30-minute payment hold (HOLD_MINUTES) to outlast the
+        // method's settlement window — otherwise the hold will already have
+        // expired when this fires and handlePaid would auto-refund a customer who
+        // legitimately paid.
+        await handlePaid(event.data.object)
+        break
+      }
+      case 'checkout.session.async_payment_failed': {
+        // A delayed-notification payment failed — free the held slot, exactly
+        // like an expired session, instead of leaving a confirmed unpaid booking.
+        const session = event.data.object
+        const bookingId = session.metadata?.booking_id
+        if (bookingId) await markBookingCancelled(bookingId)
         break
       }
       case 'checkout.session.expired': {

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { slotLabel } from '@/lib/packages'
+import { trackPurchase } from '@/lib/analytics'
 
 interface BookingSummary {
   id: string
@@ -22,6 +23,9 @@ export function ConfirmationDetails() {
   const sessionId = search.get('session_id')
 
   const [summary, setSummary] = useState<BookingSummary | null>(null)
+  // Fire the GA4 purchase conversion at most once per confirmed booking, even if
+  // the effect re-runs or React remounts the component.
+  const purchaseTracked = useRef(false)
 
   useEffect(() => {
     if (!id || !sessionId) return
@@ -29,7 +33,12 @@ export function ConfirmationDetails() {
     fetch(`/api/bookings/${encodeURIComponent(id)}?session_id=${encodeURIComponent(sessionId)}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error('not found'))))
       .then((data: { ok?: boolean; booking?: BookingSummary }) => {
-        if (active && data.ok && data.booking) setSummary(data.booking)
+        if (!active || !data.ok || !data.booking) return
+        setSummary(data.booking)
+        if (!purchaseTracked.current && data.booking.paymentStatus === 'paid') {
+          purchaseTracked.current = true
+          trackPurchase(data.booking)
+        }
       })
       .catch(() => {
         /* Reference is still shown below; details are a best-effort enhancement. */

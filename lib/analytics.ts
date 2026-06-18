@@ -32,11 +32,14 @@ export function trackPurchase(booking: {
   id: string
   packageName: string
   packagePrice: number
+  totalPrice: number
 }): void {
   if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'purchase', {
       transaction_id: booking.id,
-      value: booking.packagePrice,
+      // The transaction value is what the customer was actually charged
+      // (package + travel fee), so GA revenue matches the Stripe charge.
+      value: booking.totalPrice,
       currency: 'AED',
       items: [{
         item_id: booking.id,

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { VehicleSelector } from '@/components/checkout/VehicleSelector'
-import { cn } from '@/lib/utils'
+import { cn, telHref } from '@/lib/utils'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
 
 const EMIRATES = [
@@ -389,7 +389,7 @@ export function PackageHelpForm() {
                       Ask Which Package Fits
                     </Button>
                     <a
-                      href={`tel:${process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'}`}
+                      href={telHref(process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314')}
                       className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-light-text-secondary hover:text-light-text transition-colors duration-150"
                     >
                       <Phone className="w-4 h-4" aria-hidden="true" />

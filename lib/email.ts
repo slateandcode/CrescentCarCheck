@@ -21,6 +21,32 @@ function fromAddress(): string {
   return raw.includes('<') ? raw : `Crescent Car Check <${raw}>`
 }
 
+/**
+ * Resend's SDK has no client-side timeout, so a stalled socket would hang the
+ * awaiting request until the serverless platform kills the whole function —
+ * failing the user's request even when the work is best-effort. Cap every send
+ * so a mail-provider stall can't exceed the function budget; callers still
+ * try/catch around this, so a timeout just logs and resolves like any other
+ * send failure.
+ */
+const SEND_TIMEOUT_MS = 8000
+type SendPayload = Parameters<ReturnType<typeof getResend>['emails']['send']>[0]
+async function sendEmail(payload: SendPayload): Promise<void> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('resend send timed out')), SEND_TIMEOUT_MS)
+  })
+  const send = getResend().emails.send(payload)
+  // If the timeout wins the race the send promise is abandoned; swallow any late
+  // rejection so a delayed socket error can't surface as an unhandled rejection.
+  send.catch(() => {})
+  try {
+    await Promise.race([send, timeout])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
 function esc(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -107,13 +133,12 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
     return
   }
 
-  const resend = getResend()
   const from = fromAddress()
 
   // 1) Owner alert
   if (OWNER_EMAIL) {
     try {
-      await resend.emails.send({
+      await sendEmail({
         from,
         to: OWNER_EMAIL,
         replyTo: record.customerEmail || undefined,
@@ -133,7 +158,7 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
   // 2) Customer confirmation (only if they shared an email)
   if (record.customerEmail) {
     try {
-      await resend.emails.send({
+      await sendEmail({
         from,
         to: record.customerEmail,
         subject: `Payment received — your inspection request (${record.id})`,
@@ -182,7 +207,7 @@ export async function notifyLatePaymentRefund(
     return
   }
   try {
-    await getResend().emails.send({
+    await sendEmail({
       from: fromAddress(),
       to: OWNER_EMAIL,
       replyTo: record.customerEmail || undefined,
@@ -213,21 +238,26 @@ export interface ContactMessage {
   message: string
 }
 
-/** Forwards a contact-form submission to the owner inbox. Never throws. */
-export async function notifyContactMessage(msg: ContactMessage): Promise<void> {
+/**
+ * Forwards a contact-form submission to the owner inbox. Never throws; instead
+ * reports its outcome so the route can tell a genuine delivery failure ('failed')
+ * apart from "no mail backend configured yet" ('skipped') and not show the
+ * customer a false "Message sent".
+ */
+export async function notifyContactMessage(msg: ContactMessage): Promise<'ok' | 'skipped' | 'failed'> {
   if (!isResendConfigured()) {
     console.log('[email] Resend not configured — skipping contact notification')
-    return
+    return 'skipped'
   }
   if (!OWNER_EMAIL) {
     console.warn('[email] BUSINESS_OWNER_EMAIL not set — contact notification skipped')
-    return
+    return 'skipped'
   }
 
   const vehicle = [msg.carMake, msg.carModel, msg.carYear].filter(Boolean).join(' ').trim()
 
   try {
-    await getResend().emails.send({
+    await sendEmail({
       from: fromAddress(),
       to: OWNER_EMAIL,
       replyTo: msg.email,
@@ -244,7 +274,9 @@ export async function notifyContactMessage(msg: ContactMessage): Promise<void> {
          <p style="font-size:14px;color:#3f3f46;margin:16px 0 0;white-space:pre-wrap;">${esc(msg.message)}</p>`,
       ),
     })
+    return 'ok'
   } catch (err) {
     console.error('[email] contact notification failed', err)
+    return 'failed'
   }
 }

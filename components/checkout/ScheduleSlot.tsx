@@ -143,6 +143,9 @@ export function ScheduleSlot({
       if (!active) return
       setLoading(true)
       setLoadError(false)
+      // Drop the previous date's map so the grid shows "Checking availability…"
+      // instead of briefly flashing the old date's slot states for one frame.
+      setAvailability(null)
       // NOTE: do NOT reset clearedMessage here. A distance change to a
       // long-distance emirate clears an incompatible slot and sets clearedMessage
       // in a separate effect; this fetch fires on the same change, so resetting it
@@ -279,7 +282,7 @@ export function ScheduleSlot({
         )}
 
         <div
-          role="radiogroup"
+          role="group"
           aria-label="Time slot"
           aria-busy={loading}
           className="grid grid-cols-2 sm:grid-cols-3 gap-3"
@@ -300,8 +303,7 @@ export function ScheduleSlot({
               <button
                 key={s.value}
                 type="button"
-                role="radio"
-                aria-checked={active}
+                aria-pressed={active}
                 disabled={disabled}
                 onClick={() => {
                   setClearedMessage(false)

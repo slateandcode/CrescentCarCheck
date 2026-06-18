@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSlotAvailability } from '@/lib/availability'
 import { clientIp, rateLimitOk } from '@/lib/rate-limit'
+import { dubaiTodayISO } from '@/lib/validation'
 import type { DistanceClass } from '@/types/booking'
 
 /**
@@ -19,14 +20,6 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 /** Furthest bookable date ahead of today — mirrors the checkout UI's date cap
  *  (ScheduleSlot MAX_DAYS) and the booking validator so the three agree. */
 const MAX_DAYS = 60
-
-/** Local yyyy-mm-dd for "today" (UAE has no DST, server may be UTC — close enough
- *  for a not-in-the-past guard; the API also relies on the DB for real conflicts). */
-function todayISO(): string {
-  const d = new Date()
-  const tz = d.getTimezoneOffset() * 60000
-  return new Date(d.getTime() - tz).toISOString().slice(0, 10)
-}
 
 /** Add n days to a yyyy-mm-dd string without timezone drift. */
 function addDaysISO(iso: string, n: number): string {
@@ -60,12 +53,15 @@ export async function GET(req: Request) {
   if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
     return NextResponse.json({ ok: false, error: 'Invalid date.' }, { status: 400 })
   }
-  if (date < todayISO()) {
+  // Anchor "today" to Asia/Dubai (the slot model's timezone) so this guard
+  // agrees with the UI date cap and the booking validator — on a UTC server the
+  // boundary date would otherwise be rejected here during the Dubai small hours.
+  if (date < dubaiTodayISO()) {
     return NextResponse.json({ ok: false, error: 'Date is in the past.' }, { status: 400 })
   }
   // Far-future upper bound — reject dates the UI could never offer, so enumeration
   // can't probe arbitrarily distant dates.
-  if (date > addDaysISO(todayISO(), MAX_DAYS)) {
+  if (date > addDaysISO(dubaiTodayISO(), MAX_DAYS)) {
     return NextResponse.json({ ok: false, error: 'Date is too far in the future.' }, { status: 400 })
   }
 
