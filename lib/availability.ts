@@ -168,6 +168,33 @@ export async function attachStripeSession(id: string, sessionId: string): Promis
 }
 
 /**
+ * Persists what Stripe actually charged after a promotion code (amount + saving
+ * in FILS, plus the code string) so the admin dashboard reflects the discount
+ * instead of the list total_price. Best-effort: the payment has already settled
+ * by the time this runs, so a failure here must never bubble up and fail the
+ * webhook (which would make Stripe retry and re-send emails) — it logs and
+ * resolves, leaving the columns NULL so the dashboard falls back to total_price.
+ */
+export async function attachPaymentDetails(
+  id: string,
+  details: { amountPaidFils: number | null; discountFils: number | null; promoCode: string | null },
+): Promise<void> {
+  try {
+    const { error } = await db()
+      .from('bookings')
+      .update({
+        amount_paid: details.amountPaidFils,
+        discount_amount: details.discountFils,
+        promo_code: details.promoCode,
+      })
+      .eq('id', id)
+    if (error) throw error
+  } catch (err) {
+    console.error('[booking] failed to persist payment details (ignored)', { id }, err)
+  }
+}
+
+/**
  * Cancels a still-pending hold (best-effort) when Stripe session creation fails
  * after insert — frees the slot immediately instead of waiting 30 minutes.
  * Uses the cancel_pending_booking RPC so the transition stays idempotent.
@@ -236,6 +263,9 @@ export function rowToRecord(row: Booking): BookingRecord {
     packagePrice: row.package_price,
     travelFee: row.travel_fee,
     totalPrice: row.total_price,
+    amountPaid: row.amount_paid,
+    discountAmount: row.discount_amount,
+    promoCode: row.promo_code,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     customerEmail: row.customer_email,

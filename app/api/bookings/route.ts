@@ -69,8 +69,6 @@ export async function POST(req: Request) {
     carMake: body.carMake ?? '',
     carModel: body.carModel ?? '',
     carYear: body.carYear ?? '',
-    vin: body.vin ?? '',
-    plateNumber: body.plateNumber ?? '',
     additionalNotes: body.additionalNotes ?? '',
     inspectionDate: body.inspectionDate ?? '',
     slotTime: body.slotTime ?? '',
@@ -123,8 +121,10 @@ export async function POST(req: Request) {
     carMake: form.carMake.trim(),
     carModel: form.carModel.trim(),
     carYear: form.carYear,
-    vin: form.vin.trim() || null,
-    plateNumber: form.plateNumber.trim() || null,
+    // VIN / plate inputs were removed from the public checkout (conversion); the
+    // columns + RPC params remain, so always send null for website bookings.
+    vin: null,
+    plateNumber: null,
     inspectionDate: form.inspectionDate,
     slotTime,
     packageId: pkg.id,

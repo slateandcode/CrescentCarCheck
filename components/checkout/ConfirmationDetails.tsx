@@ -11,10 +11,19 @@ interface BookingSummary {
   packagePrice: number
   travelFee: number
   totalPrice: number
+  /** Actually charged after any promotion code (AED). Falls back to totalPrice. */
+  amountPaid: number
+  /** Saving from a promotion code (AED); 0 when none was used. */
+  discount: number
   inspectionDate: string
   slotTime: string
   paymentStatus: string
   bookingStatus: string
+}
+
+/** AED amount for display — whole numbers stay clean, fractional show 2dp. */
+function aed(amount: number): string {
+  return Number.isInteger(amount) ? `${amount}` : amount.toFixed(2)
 }
 
 export function ConfirmationDetails() {
@@ -63,7 +72,13 @@ export function ConfirmationDetails() {
       <Detail label="Reference" value={id} mono />
       {summary && (
         <>
-          <Detail label="Package" value={`${summary.packageName} · AED ${summary.totalPrice}`} />
+          <Detail label="Package" value={`${summary.packageName} · AED ${aed(summary.totalPrice)}`} />
+          {summary.discount > 0 && (
+            <>
+              <Detail label="Discount applied" value={`−AED ${aed(summary.discount)}`} />
+              <Detail label="Total paid" value={`AED ${aed(summary.amountPaid)}`} />
+            </>
+          )}
           <Detail label="Date" value={summary.inspectionDate} />
           {slotText && <Detail label="Slot" value={slotText} />}
         </>

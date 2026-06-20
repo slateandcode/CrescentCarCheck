@@ -46,8 +46,6 @@ function emptyForm(packageId: PackageId): BookingFormData {
     carMake: '',
     carModel: '',
     carYear: '',
-    vin: '',
-    plateNumber: '',
     additionalNotes: '',
     inspectionDate: '',
     slotTime: '',
@@ -236,30 +234,6 @@ export function CheckoutForm() {
               errors={{ carMake: errors.carMake, carModel: errors.carModel, carYear: errors.carYear }}
               onChange={update}
             />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <Field id={id('vin')} label="VIN / chassis number" optional hint="If you have it — helps us prep for the inspection.">
-                <input
-                  id={id('vin')}
-                  type="text"
-                  autoComplete="off"
-                  value={form.vin}
-                  onChange={(e) => update({ vin: e.target.value })}
-                  className={cn(inputBase, fieldBorder(undefined))}
-                />
-              </Field>
-
-              <Field id={id('plateNumber')} label="Plate number" optional hint="If you have it.">
-                <input
-                  id={id('plateNumber')}
-                  type="text"
-                  autoComplete="off"
-                  value={form.plateNumber}
-                  onChange={(e) => update({ plateNumber: e.target.value })}
-                  className={cn(inputBase, fieldBorder(undefined))}
-                />
-              </Field>
-            </div>
           </section>
 
           {/* Location */}

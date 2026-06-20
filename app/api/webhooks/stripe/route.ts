@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
-import { getStripe, isStripeConfigured } from '@/lib/stripe'
+import { getCheckoutAmounts, getStripe, isStripeConfigured } from '@/lib/stripe'
 import {
   attachCalendarEvent,
+  attachPaymentDetails,
   getBookingById,
   markBookingCancelled,
   markBookingPaid,
@@ -170,8 +171,33 @@ async function handlePaid(session: Stripe.Checkout.Session): Promise<void> {
 
   const record = rowToRecord(row as Booking)
 
+  // What the customer ACTUALLY paid. With a promotion code applied (Checkout's
+  // allow_promotion_codes field), amount_total is below the booking's list
+  // total_price, so derive the figures Stripe charged rather than the stamped
+  // price. Amounts are in fils; total_details.amount_discount is the saving.
+  // Falls back to the list total when Stripe omits the field (no discount).
+  const amountPaid =
+    typeof session.amount_total === 'number' ? session.amount_total / 100 : record.totalPrice
+  const discount =
+    typeof session.total_details?.amount_discount === 'number'
+      ? session.total_details.amount_discount / 100
+      : 0
+
   // Notify owner + customer. Best-effort (never throws).
-  await notifyPaidBooking(record)
+  await notifyPaidBooking(record, { amountPaid, discount })
+
+  // Persist what Stripe actually charged so the admin dashboard reflects the
+  // discount, not the list total. Store RAW fils from the event (lossless for
+  // percentage codes); the promo-code STRING needs a session retrieve, so it's
+  // best-effort — if it fails we still record amount + discount. attachPaymentDetails
+  // never throws, so this can never fail the paid booking.
+  const amountPaidFils = typeof session.amount_total === 'number' ? session.amount_total : null
+  const discountFils =
+    typeof session.total_details?.amount_discount === 'number'
+      ? session.total_details.amount_discount
+      : null
+  const promoCode = (await getCheckoutAmounts(session.id))?.promoCode ?? null
+  await attachPaymentDetails(bookingId, { amountPaidFils, discountFils, promoCode })
 
   // Tentative calendar hold — must NOT fail the paid booking.
   try {

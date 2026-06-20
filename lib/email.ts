@@ -55,6 +55,21 @@ function esc(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+/** What the customer was actually charged, after any Stripe promotion code.
+ *  Resolved by the webhook from the Checkout session; absent for non-paid emails. */
+export interface PaidAmounts {
+  /** Amount actually charged, in AED (may be fractional after a percentage code). */
+  amountPaid: number
+  /** Saving applied, in AED (0 when no promotion code was used). */
+  discount: number
+}
+
+/** AED for display: whole amounts stay clean (AED 450), fractional show 2dp
+ *  (AED 382.50) — a percentage promo code can land on a non-integer total. */
+function aed(amount: number): string {
+  return Number.isInteger(amount) ? `AED ${amount}` : `AED ${amount.toFixed(2)}`
+}
+
 function layout(title: string, bodyHtml: string): string {
   return `<!doctype html><html><body style="margin:0;background:#f4f4f5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#18181b;">
   <div style="max-width:560px;margin:0 auto;padding:24px;">
@@ -78,7 +93,7 @@ function row(label: string, value: string): string {
   </tr>`
 }
 
-function bookingTable(record: BookingRecord): string {
+function bookingTable(record: BookingRecord, paid?: PaidAmounts): string {
   // Coerce to finite numbers before interpolating into the href. The API uses a
   // type-assertion (not runtime validation), so these could arrive as arbitrary
   // JSON; forcing them to real numbers makes HTML/URL injection impossible.
@@ -92,15 +107,21 @@ function bookingTable(record: BookingRecord): string {
   const mapLink = hasCoords
     ? `<a href="https://www.google.com/maps?q=${lat},${lng}" style="color:#a16207;">Open in Maps</a>`
     : ''
+  // When a promotion code was used, total_price is the list price and paid.amountPaid
+  // is what Stripe actually charged; show the saving and the real total.
+  const hasDiscount = Boolean(paid && paid.discount > 0)
+  const totalPaid = paid ? paid.amountPaid : record.totalPrice
   const paymentText =
     record.paymentStatus === 'paid'
-      ? `Paid — AED ${record.totalPrice}`
-      : `${record.paymentStatus} — AED ${record.totalPrice}`
+      ? `Paid — ${aed(totalPaid)}`
+      : `${record.paymentStatus} — ${aed(record.totalPrice)}`
   return `<table style="width:100%;border-collapse:collapse;">
     ${row('Reference', esc(record.id))}
-    ${row('Package', `${esc(record.packageName)} — AED ${record.packagePrice}`)}
-    ${record.travelFee > 0 ? row('Travel fee', `AED ${record.travelFee} (${esc(record.emirate)})`) : ''}
-    ${row('Total paid', `AED ${record.totalPrice}`)}
+    ${row('Package', `${esc(record.packageName)} — ${aed(record.packagePrice)}`)}
+    ${record.travelFee > 0 ? row('Travel fee', `${aed(record.travelFee)} (${esc(record.emirate)})`) : ''}
+    ${hasDiscount ? row('Subtotal', aed(record.totalPrice)) : ''}
+    ${hasDiscount ? row('Discount', `&minus;${aed(paid?.discount ?? 0)}`) : ''}
+    ${row('Total paid', aed(totalPaid))}
     ${row('Payment', esc(paymentText))}
     ${row('Name', esc(record.customerName))}
     ${row('Phone', esc(record.customerPhone))}
@@ -125,7 +146,7 @@ const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314
  * paid-booking alert and, if the customer shared an email, a confirmation.
  * Safe to await — never throws.
  */
-export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
+export async function notifyPaidBooking(record: BookingRecord, paid?: PaidAmounts): Promise<void> {
   if (!isResendConfigured()) {
     console.log('[email] Resend not configured — skipping booking notifications', {
       id: record.id,
@@ -134,6 +155,8 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
   }
 
   const from = fromAddress()
+  const hasDiscount = Boolean(paid && paid.discount > 0)
+  const amountPaid = paid ? paid.amountPaid : record.totalPrice
 
   // 1) Owner alert
   if (OWNER_EMAIL) {
@@ -145,7 +168,7 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
         subject: `PAID booking ${record.id} — ${record.packageName} (${record.emirate})`,
         html: layout(
           'New paid inspection request',
-          `<p style="font-size:14px;color:#3f3f46;margin:0 0 16px;">A booking was just paid and is awaiting time confirmation:</p>${bookingTable(record)}`,
+          `<p style="font-size:14px;color:#3f3f46;margin:0 0 16px;">A booking was just paid and is awaiting time confirmation:</p>${bookingTable(record, paid)}`,
         ),
       })
     } catch (err) {
@@ -170,8 +193,9 @@ export async function notifyPaidBooking(record: BookingRecord): Promise<void> {
            </p>
            <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
              ${row('Reference', esc(record.id))}
-             ${row('Package', `${esc(record.packageName)} — AED ${record.packagePrice}`)}
-             ${row('Amount paid', `AED ${record.totalPrice}`)}
+             ${row('Package', `${esc(record.packageName)} — ${aed(record.packagePrice)}`)}
+             ${hasDiscount ? row('Discount', `&minus;${aed(paid?.discount ?? 0)}`) : ''}
+             ${row('Amount paid', aed(amountPaid))}
              ${row('Date', esc(record.inspectionDate))}
              ${row('Slot', esc(slotLabel(record.slotTime)))}
            </table>

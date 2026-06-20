@@ -36,6 +36,41 @@ export function getStripe(): Stripe {
 }
 
 /**
+ * Reads what a completed Checkout session ACTUALLY charged, after any promotion
+ * code (amount_total / total_details are in fils → returned as AED). Best-effort:
+ * returns null if the session can't be read, so callers fall back to the booking's
+ * stored list total_price. Used by the confirmation summary + GA purchase value so
+ * a discounted booking doesn't display / report the undiscounted price.
+ */
+export async function getCheckoutAmounts(
+  sessionId: string,
+): Promise<{ amountPaid: number; discount: number; promoCode: string | null } | null> {
+  try {
+    // Expand the promotion_code so we can read the customer-facing code STRING
+    // (e.g. 'CRESCENT50'); the bare session only carries its id. amount_total /
+    // total_details are present without expansion.
+    const session = await getStripe().checkout.sessions.retrieve(sessionId, {
+      expand: ['discounts.promotion_code'],
+    })
+    if (typeof session.amount_total !== 'number') return null
+    const promo = session.discounts?.[0]?.promotion_code
+    return {
+      amountPaid: session.amount_total / 100,
+      discount:
+        typeof session.total_details?.amount_discount === 'number'
+          ? session.total_details.amount_discount / 100
+          : 0,
+      // When expanded, promotion_code is the object; fall back to null for a bare
+      // id or a discount applied via a raw coupon (no customer-typed code).
+      promoCode: promo && typeof promo === 'object' ? promo.code : null,
+    }
+  } catch (err) {
+    console.error('[stripe] failed to read checkout amounts', { sessionId }, err)
+    return null
+  }
+}
+
+/**
  * Creates a Stripe Checkout Session for a booking hold. The amount and name are
  * derived from the server-built record (never client-sent money). booking_id is
  * stamped in metadata so the webhook can resolve the booking on success/expiry.
@@ -46,6 +81,14 @@ export async function createCheckoutSession(
 ): Promise<Stripe.Checkout.Session> {
   return getStripe().checkout.sessions.create({
     mode: 'payment',
+    // Show Stripe Checkout's built-in "Add promotion code" field. Codes are
+    // created and managed by the business in the Stripe Dashboard (Products →
+    // Coupons → Promotion codes): percentage or fixed-AED off, expiry, redemption
+    // caps, first-time-only, minimum order, etc. Stripe validates them entirely
+    // server-side, so there is no code-validation endpoint to build or secure here.
+    // The discount is reflected in amount_total/total_details on the resulting
+    // session — see the webhook (handlePaid), which records what was actually paid.
+    allow_promotion_codes: true,
     // Stripe Checkout sessions default to a 24h lifetime, but the database payment
     // hold only lives HOLD_MINUTES (30). Cap the session so an abandoned checkout
     // can't be completed long after its slot was released. Stripe requires the

@@ -50,8 +50,6 @@ const MAX_LEN = {
   customerName: 120,
   address: 500,
   additionalNotes: 2000,
-  vin: 32,
-  plateNumber: 16,
   carMake: 80,
   carModel: 80,
 } as const
@@ -162,12 +160,6 @@ export function validateForm(form: BookingFormData): BookingFormErrors {
   // Optional free-text fields: only length-capped (content is unvalidated by design).
   if (form.additionalNotes.trim().length > MAX_LEN.additionalNotes) {
     errors.additionalNotes = 'Please shorten your note'
-  }
-  if (form.vin.trim().length > MAX_LEN.vin) {
-    errors.vin = 'VIN is too long'
-  }
-  if (form.plateNumber.trim().length > MAX_LEN.plateNumber) {
-    errors.plateNumber = 'Plate number is too long'
   }
 
   return errors

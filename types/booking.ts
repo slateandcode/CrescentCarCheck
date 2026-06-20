@@ -69,10 +69,6 @@ export interface BookingFormData {
   carMake: string
   carModel: string
   carYear: string
-  /** Optional — VIN / chassis number, if the customer has it. */
-  vin: string
-  /** Optional — plate number, if the customer has it. */
-  plateNumber: string
   additionalNotes: string
   inspectionDate: string // ISO yyyy-mm-dd (Asia/Dubai)
   slotTime: SlotTime | ''
@@ -96,8 +92,16 @@ export interface BookingRecord {
   packagePrice: number
   /** Flat travel surcharge in AED for long-distance emirates (0 for none). */
   travelFee: number
-  /** Amount the customer pays (and Stripe charges): packagePrice + travelFee. */
+  /** List price (packagePrice + travelFee), before any promotion code. */
   totalPrice: number
+  /** What Stripe ACTUALLY charged after a promotion code, in FILS (1 AED = 100 fils),
+   *  NOT AED like the prices above. NULL for pre-feature / manual bookings → fall back
+   *  to totalPrice. Stored fils-exact so a percentage code never rounds. */
+  amountPaid: number | null
+  /** Promotion-code saving in FILS (NULL or 0 = no code used). */
+  discountAmount: number | null
+  /** Promotion code entered at Checkout, e.g. 'CRESCENT50' (NULL = none). */
+  promoCode: string | null
   customerName: string
   customerPhone: string
   customerEmail: string | null
@@ -158,6 +162,12 @@ export interface Booking {
   package_price: number
   travel_fee: number
   total_price: number
+  /** Real charge after a promotion code, in FILS (NULL = unknown → use total_price). */
+  amount_paid: number | null
+  /** Promotion-code saving in FILS (NULL or 0 = none). */
+  discount_amount: number | null
+  /** Promotion code string entered at Checkout, e.g. 'CRESCENT50' (NULL = none). */
+  promo_code: string | null
   stripe_session_id: string | null
   stripe_payment_intent_id: string | null
   payment_status: PaymentStatus
