@@ -194,6 +194,8 @@ export async function notifyPaidBooking(record: BookingRecord, paid?: PaidAmount
            <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
              ${row('Reference', esc(record.id))}
              ${row('Package', `${esc(record.packageName)} — ${aed(record.packagePrice)}`)}
+             ${record.travelFee > 0 ? row('Travel fee', `${aed(record.travelFee)} (${esc(record.emirate)})`) : ''}
+             ${hasDiscount ? row('Subtotal', aed(record.totalPrice)) : ''}
              ${hasDiscount ? row('Discount', `&minus;${aed(paid?.discount ?? 0)}`) : ''}
              ${row('Amount paid', aed(amountPaid))}
              ${row('Date', esc(record.inspectionDate))}

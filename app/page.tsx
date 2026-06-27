@@ -8,11 +8,11 @@ import { HowItWorks } from '@/components/home/HowItWorks'
 import { WhyChooseUs } from '@/components/home/WhyChooseUs'
 import { InspectionHighlights } from '@/components/home/InspectionHighlights'
 import { SampleReport } from '@/components/home/SampleReport'
-import { ComparisonTable } from '@/components/packages/ComparisonTable'
 import { RecentlyInspected } from '@/components/home/RecentlyInspected'
 import { Testimonials } from '@/components/home/Testimonials'
 import { FAQ } from '@/components/home/FAQ'
 import { CTABanner } from '@/components/home/CTABanner'
+import { DiscountPopup } from '@/components/home/DiscountPopup'
 
 export const metadata: Metadata = {
   title: 'Professional Car Inspections in UAE',
@@ -38,14 +38,10 @@ export default function HomePage() {
       <WhyInspectionMatters />
       <SampleReport />
       <WhyChooseUs />
-      <section className="bg-light-bg section-padding">
-        <div className="container-wide">
-          <ComparisonTable topSpacing={false} />
-        </div>
-      </section>
       <Testimonials />
       <FAQ />
       <CTABanner />
+      <DiscountPopup />
     </>
   )
 }

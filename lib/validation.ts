@@ -38,8 +38,11 @@ const EMIRATES: readonly Emirate[] = [
 /** Valid parking-type values — kept in sync with the ParkingType union. */
 const PARKING_TYPES: readonly ParkingType[] = ['showroom', 'outdoor', 'home']
 
-/** Valid package ids — kept in sync with the PackageId union. */
-const PACKAGE_IDS: readonly PackageId[] = ['standard', 'comprehensive', 'premium']
+/** Package ids accepted on NEW bookings. 'comprehensive' was retired (only two
+ *  packages are sold now); legacy rows keep it, but a new submission must be one
+ *  of these. The checkout form maps any stale ?package=comprehensive link to a
+ *  current package before submit (see resolvePackage). */
+const PACKAGE_IDS: readonly PackageId[] = ['standard', 'premium']
 
 /**
  * Max lengths for free-text customer fields. The DB columns are unbounded

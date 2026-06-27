@@ -2,53 +2,42 @@
 
 import { memo } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react'
-import { Package } from '@/types/booking'
+import { Check, X } from 'lucide-react'
+import type { Package, PackageFeature } from '@/types/booking'
 import { cn } from '@/lib/utils'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
-import { Button } from './Button'
 
 interface PackageCardProps {
   pkg: Package
-  variant?: 'compact' | 'full'
-  onSelect?: (pkg: Package) => void
-  selected?: boolean
+  /** Where the CTA links; defaults to the package's checkout URL. */
   linkHref?: string
+  onSelect?: (pkg: Package) => void
 }
 
-function FeatureRow({ feature }: { feature: string }) {
-  const isInheritance = feature.startsWith('Everything in')
+function FeatureItem({ label, included }: PackageFeature) {
   return (
-    <li className="flex items-start gap-2">
-      {isInheritance ? (
-        <ChevronRight className="w-3.5 h-3.5 text-accent mt-1 flex-shrink-0" aria-hidden="true" />
+    <li className="flex items-start gap-1.5">
+      {included ? (
+        <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-success" aria-hidden="true" />
       ) : (
-        <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-1 flex-shrink-0" aria-hidden="true" />
+        <X className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-error/70" aria-hidden="true" />
       )}
       <span
         className={cn(
-          'text-sm',
-          isInheritance
-            ? 'text-text-primary font-semibold'
-            : 'text-text-secondary'
+          'text-[12.5px] leading-snug',
+          included
+            ? 'text-text-secondary'
+            : 'text-text-muted line-through decoration-text-muted/50',
         )}
       >
-        {feature}
+        {label}
       </span>
     </li>
   )
 }
 
-function PackageCardComponent({
-  pkg,
-  variant = 'full',
-  onSelect,
-  selected = false,
-  linkHref,
-}: PackageCardProps) {
-  const isCompact = variant === 'compact'
-  const visibleFeatures = isCompact ? pkg.features.slice(0, 5) : pkg.features
-  const remaining = pkg.features.length - visibleFeatures.length
+function PackageCardComponent({ pkg, linkHref, onSelect }: PackageCardProps) {
+  const isPremium = Boolean(pkg.recommended)
 
   const handleCtaClick = () => {
     trackEvent(GA_EVENTS.SELECT_PACKAGE, {
@@ -61,78 +50,68 @@ function PackageCardComponent({
   return (
     <div
       className={cn(
-        'relative rounded-card border p-6 flex flex-col transition-all duration-300',
-        pkg.popular
-          ? 'bg-card border-accent shadow-card-hover md:-mt-2 md:pb-8 z-10'
-          : 'bg-card border-border hover:border-border-hover',
-        selected && 'border-accent bg-accent-muted'
+        // Dark, elevated card on the light section — a deep shadow lifts it off
+        // the page; the recommended tier carries the gold ring + glow.
+        'group relative flex flex-col rounded-card-lg p-6 sm:p-8',
+        'shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)]',
+        'transition-transform duration-300 motion-safe:hover:-translate-y-1',
+        isPremium
+          ? 'bg-gradient-to-b from-[#221c0e] via-[#141414] to-[#0b0b0b] ring-2 ring-accent/60 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55),0_0_44px_rgba(255,198,0,0.10)]'
+          : 'bg-gradient-to-b from-[#1d1d1d] to-[#0c0c0c] ring-1 ring-white/10',
       )}
     >
-      {pkg.popular && (
-        <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-background text-xs font-bold px-3 py-1 rounded-full">
-          {pkg.badge ?? 'Most Popular'}
+      {isPremium && (
+        <span className="absolute right-6 top-0 -translate-y-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-background shadow-[0_4px_14px_rgba(255,198,0,0.4)]">
+          Recommended
         </span>
       )}
 
-      <h3 className="text-display-xs font-bold text-text-primary">{pkg.name}</h3>
-      <p className="text-text-secondary text-sm mt-1">{pkg.tagline}</p>
-
-      <div className="mt-5">
-        <div className="flex items-end gap-1.5 flex-wrap">
-          <span className="text-text-secondary text-sm font-medium pb-1.5">AED</span>
-          <span className="text-4xl font-black text-text-primary leading-none">
-            {pkg.price}
-          </span>
-          {/* Price varies by emirate (travel fee), so the card shows a "from" price. */}
-          <span className="text-text-muted text-xs font-medium pb-1.5">onwards</span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-xl font-bold text-text-primary">{pkg.name} Inspection</h3>
+          <p className="mt-1 text-sm text-text-secondary">{pkg.tagline}</p>
         </div>
-        <span className="inline-block mt-3 text-xs font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-tag">
-          {pkg.inspectionPoints} point check
-        </span>
+        <div className="text-right">
+          <p className="whitespace-nowrap text-3xl font-black leading-none tabular-nums text-accent">
+            <span className="text-sm font-bold text-accent/70">AED </span>
+            {pkg.price}
+          </p>
+          <p className="mt-1.5 text-[11px] font-medium text-text-muted">one-time</p>
+        </div>
       </div>
 
-      <ul className="space-y-2.5 mt-6 flex-1">
-        {visibleFeatures.map((feature, i) => (
-          <FeatureRow key={i} feature={feature} />
+      {/* Core checks — included in both packages (always ticked). */}
+      <ul className="mt-6 grid grid-cols-2 gap-x-3 gap-y-2">
+        {pkg.coreFeatures.map((label) => (
+          <FeatureItem key={label} label={label} included />
         ))}
-        {isCompact && remaining > 0 && (
-          <li className="pt-1">
-            <Link
-              href="/packages"
-              className="text-sm font-semibold text-accent hover:underline"
-            >
-              + {remaining} more checks, see full plan →
-            </Link>
-          </li>
-        )}
       </ul>
 
-      <div className="mt-6">
-        {linkHref ? (
-          <Link
-            href={linkHref}
-            onClick={handleCtaClick}
-            className={cn(
-              'inline-flex items-center justify-center gap-2 w-full rounded-button font-semibold px-6 py-3 text-base transition-all duration-200',
-              pkg.popular
-                ? 'bg-accent text-background hover:bg-accent-hover'
-                : 'bg-card text-text-primary border border-border hover:border-border-hover hover:bg-card-hover'
-            )}
-          >
-            <span className="truncate">{pkg.ctaLabel}</span>
-            <ArrowRight className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-          </Link>
-        ) : (
-          <Button
-            variant={pkg.popular ? 'primary' : 'secondary'}
-            size="lg"
-            fullWidth
-            arrow
-            onClick={handleCtaClick}
-          >
-            {pkg.ctaLabel}
-          </Button>
-        )}
+      {/* Premium-only checks — ticked on Premium, crossed on Standard. */}
+      <div className="my-5 border-t border-dashed border-white/10 pt-5">
+        <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+          Premium-only checks
+        </p>
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-2">
+          {pkg.extraFeatures.map((f) => (
+            <FeatureItem key={f.label} label={f.label} included={f.included} />
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-2 flex-1 flex flex-col justify-end">
+        <Link
+          href={linkHref ?? `/checkout?package=${pkg.id}`}
+          onClick={handleCtaClick}
+          className={cn(
+            'inline-flex w-full items-center justify-center rounded-button px-6 py-3.5 text-base transition-colors duration-200',
+            isPremium
+              ? 'bg-accent font-bold text-background shadow-[0_8px_24px_rgba(255,198,0,0.22)] hover:bg-accent-hover'
+              : 'border border-white/20 font-semibold text-text-primary hover:border-white/40 hover:bg-white/5',
+          )}
+        >
+          {pkg.ctaLabel}
+        </Link>
       </div>
     </div>
   )

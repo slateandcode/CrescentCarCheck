@@ -1,71 +1,79 @@
 import { DistanceClass, Emirate, Package, SlotTime } from '@/types/booking'
 
+/**
+ * Core checks included in BOTH packages — the ✓✓ rows of the client's package
+ * table (brief item 2). Shown with a green tick on every card.
+ */
+const CORE_FEATURES: string[] = [
+  'Accident history check',
+  'Flooding & visual rust check',
+  'Exterior bodywork check',
+  'Bodywork & paint meter check',
+  'Chassis condition check',
+  'Interior condition check',
+  'AC check',
+  'Engine bay check',
+  'Visible fluid leak check',
+  'Computer diagnostic test',
+  'Battery health check',
+  'Electrical & lights check',
+  'Tyres, rims & brakes condition',
+  'Suspension check',
+  'Transmission check',
+  'Basic test drive',
+  'Photos of visible faults',
+  'Instant digital report',
+  'Buy / negotiate / avoid recommendation',
+]
+
+/**
+ * Extra checks only in Premium (brief item 2/3, the Premium-only rows). Rendered
+ * with a green tick on the Premium card and a red cross on the Standard card.
+ */
+const PREMIUM_FEATURES: string[] = [
+  'Full underbody inspection',
+  'Advanced camera check for hidden leaks',
+  'Brake disc wear check',
+  'Odometer tampering assessment',
+  '10-minute continuous test drive',
+  '20-minute inspector summary call',
+  'Price negotiation notes',
+]
+
 export const PACKAGES: Package[] = [
   {
     id: 'standard',
     name: 'Standard',
-    price: 249,
-    tagline: 'Core checks for everyday used cars.',
-    inspectionPoints: '250+',
-    features: [
-      'Exterior visual inspection',
-      'Interior condition check',
-      'Exterior paint meter checks',
-      'AC temperature check',
-      'Tyres condition check',
-      'Rims & brakes visual check',
-      'Exterior lights & brake lights check',
-      'Engine bay visual inspection',
-      'Basic visible fluid leak check',
-      'Accident history check',
-    ],
-    ctaLabel: 'Book Standard',
-  },
-  {
-    id: 'comprehensive',
-    name: 'Comprehensive',
-    price: 349,
-    popular: true,
-    badge: 'Most Popular',
-    tagline: 'A more detailed inspection for buyers who want extra confidence before committing.',
-    inspectionPoints: '400+',
-    features: [
-      'Everything in Standard, plus:',
-      'Full underbody inspection',
-      'Photos of visible faults',
-      'Panel gaps check',
-      'Detailed visible fluid leak check',
-      'Suspension visual check',
-      'Test Drive Observations',
-      'Transmission check',
-      'Detailed photo report',
-      'Buy / negotiate / avoid recommendation',
-    ],
-    ctaLabel: 'Book Comprehensive',
+    price: 299,
+    tagline: 'Quick confidence before you buy.',
+    features: CORE_FEATURES,
+    coreFeatures: CORE_FEATURES,
+    extraFeatures: PREMIUM_FEATURES.map((label) => ({ label, included: false })),
+    ctaLabel: 'Book now',
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: 449,
-    tagline: 'Our most detailed inspection, designed for buyers who want the clearest picture before making a high-value purchase.',
-    inspectionPoints: '600+',
-    features: [
-      'Everything in Comprehensive, plus:',
-      'Endoscopic camera check for hard-to-see areas',
-      'Detailed engine bay inspection',
-      'Detailed engine and fluid leak check',
-      'AC compressor check',
-      'Extended OBD fault-code review',
-      'Battery and electrical system review',
-      '20-minute inspector summary call',
-      'Price negotiation notes',
-    ],
-    ctaLabel: 'Book Premium',
+    price: 399,
+    recommended: true,
+    tagline: 'Deeper checks. Clearer decision.',
+    features: [...CORE_FEATURES, ...PREMIUM_FEATURES],
+    coreFeatures: CORE_FEATURES,
+    extraFeatures: PREMIUM_FEATURES.map((label) => ({ label, included: true })),
+    ctaLabel: 'Book now',
   },
 ]
 
 export const getPackageById = (id: string): Package | undefined =>
   PACKAGES.find(p => p.id === id)
+
+/**
+ * Resolve a package for checkout/display, tolerating the retired 'comprehensive'
+ * id from old links/bookings by falling back to Premium (its closest equivalent).
+ * Never returns undefined, so callers don't have to special-case legacy ids.
+ */
+export const resolvePackage = (id: string | null | undefined): Package =>
+  (id ? getPackageById(id) : undefined) ?? getPackageById('premium')!
 
 /**
  * Travel pricing. Inspections in the nearer emirates are at the base package

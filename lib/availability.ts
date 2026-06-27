@@ -235,6 +235,34 @@ export async function markBookingCancelled(id: string): Promise<Booking | null> 
   return normaliseRpcRow(data)
 }
 
+/**
+ * Records that a late-landing payment (paid after its hold was released) was
+ * auto-refunded, transitioning payment_status → 'refunded' exactly once. Returns
+ * true when the owner should be alerted: the FIRST delivery that performs the
+ * transition, or a DB error (fail SAFE to alerting rather than silently dropping
+ * it). A Stripe webhook REDELIVERY finds the row already 'refunded' and returns
+ * false, so the "late payment auto-refunded" owner email fires at most once even
+ * though the refund itself (Stripe idempotency key) is independently safe to
+ * repeat. The conditional update is atomic, so concurrent deliveries can't both
+ * win. ('refunded' is an allowed payment_status — migration 006; booking_status
+ * stays 'cancelled', which the schema documents as Cancelled-or-Refunded.)
+ */
+export async function markBookingRefunded(id: string): Promise<boolean> {
+  try {
+    const { data, error } = await db()
+      .from('bookings')
+      .update({ payment_status: 'refunded' })
+      .eq('id', id)
+      .neq('payment_status', 'refunded')
+      .select('id')
+    if (error) throw error
+    return Array.isArray(data) && data.length > 0
+  } catch (err) {
+    console.error('[booking] failed to mark refunded (alerting anyway)', { id }, err)
+    return true
+  }
+}
+
 /** RPCs that `returns public.bookings` yield a row object, or a row of nulls /
  *  null when the function returned NULL — normalise both to null. */
 function normaliseRpcRow(data: unknown): Booking | null {

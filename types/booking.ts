@@ -38,17 +38,26 @@ export type SlotTime = '09:30' | '11:45' | '14:00' | '16:15' | '18:30'
  *  bookable at 09:30 only, also blocks the 11:45 travel buffer). */
 export type DistanceClass = 'normal' | 'long'
 
+/** One row in a package card's feature list — ticked (included) or crossed (not). */
+export interface PackageFeature {
+  label: string
+  included: boolean
+}
+
 export interface Package {
   id: PackageId
   name: string
   price: number // AED
-  popular?: boolean
-  badge?: string
+  /** Premium is flagged recommended (red badge on the card). */
+  recommended?: boolean
   tagline: string
+  /** Every included feature, flat — used by the checkout order summary. */
   features: string[]
-  notIncluded?: string[]
+  /** Core checks shown on every card (always included / green tick). */
+  coreFeatures: string[]
+  /** Premium-only checks: green tick on Premium, red cross on Standard. */
+  extraFeatures: PackageFeature[]
   ctaLabel: string
-  inspectionPoints: string
 }
 
 /**

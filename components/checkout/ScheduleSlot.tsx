@@ -87,7 +87,24 @@ export function ScheduleSlot({
   const [clearedMessage, setClearedMessage] = useState(false)
   // Resolve "today" (Dubai tz) SYNCHRONOUSLY so the native date input always
   // renders with its `min` set — never a brief window with no lower bound.
-  const [today] = useState(dubaiTodayISO)
+  const [today, setToday] = useState(dubaiTodayISO)
+
+  // Refresh "today" when the tab regains focus/visibility. Captured once at mount,
+  // it would otherwise go stale on a session left open across Dubai midnight —
+  // mislabeling yesterday as "Today" and keeping the date floor (min) a day behind
+  // the server, letting the user pick a now-past day that only fails on submit.
+  useEffect(() => {
+    const refresh = () => setToday(dubaiTodayISO())
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', refresh)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', refresh)
+    }
+  }, [])
 
   // Keep the latest onChange + current date/slot in refs so the effects can use
   // them without re-running on every parent render. Synced in an effect.

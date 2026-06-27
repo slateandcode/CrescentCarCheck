@@ -12,6 +12,10 @@ type Method = {
 const CARD_METHODS: Method[] = [
   { name: 'Mastercard', imageSrc: '/payments/Mastercard.svg', height: 'h-6 sm:h-7', wordmark: 'MC' },
   { name: 'Visa', imageSrc: '/payments/Visa.svg', height: 'h-4 sm:h-5', wordmark: 'VISA' },
+  // Apple Pay is offered automatically by Stripe Checkout on eligible Safari/iOS
+  // devices when card payments are enabled — no extra integration needed — so the
+  // mark is accurate to display alongside the cards (brief item 3, payment row).
+  { name: 'Apple Pay', imageSrc: '/payments/ApplePay.svg', height: 'h-6 sm:h-7', wordmark: 'Apple Pay' },
 ]
 
 const TABBY: Method = {

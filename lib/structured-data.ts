@@ -15,15 +15,14 @@ export function getLocalBusinessSchema() {
       addressRegion: 'Sharjah',
     },
     areaServed: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain', 'Al Ain'],
-    priceRange: 'AED 249 to AED 549',
+    priceRange: 'AED 299 to AED 399',
     openingHours: 'Mo-Su 09:00-20:00',
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Car Inspection Packages',
       itemListElement: [
-        { '@type': 'Offer', name: 'Standard Inspection', price: '249', priceCurrency: 'AED' },
-        { '@type': 'Offer', name: 'Comprehensive Inspection', price: '349', priceCurrency: 'AED' },
-        { '@type': 'Offer', name: 'Premium Inspection', price: '449', priceCurrency: 'AED' },
+        { '@type': 'Offer', name: 'Standard Inspection', price: '299', priceCurrency: 'AED' },
+        { '@type': 'Offer', name: 'Premium Inspection', price: '399', priceCurrency: 'AED' },
       ],
     },
   }

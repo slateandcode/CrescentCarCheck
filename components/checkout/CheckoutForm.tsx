@@ -6,7 +6,7 @@ import { ShieldCheck, Car, MapPin, Calendar, User, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Field, inputBase, selectClass, selectChevronStyle, fieldBorder } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
-import { PACKAGES, travelFeeForEmirate, distanceClassForEmirate } from '@/lib/packages'
+import { resolvePackage, travelFeeForEmirate, distanceClassForEmirate } from '@/lib/packages'
 import { validateForm } from '@/lib/validation'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
 import { VehicleSelector } from './VehicleSelector'
@@ -53,8 +53,11 @@ function emptyForm(packageId: PackageId): BookingFormData {
   }
 }
 
+// Only the two packages now sold. A stale ?package=comprehensive link (or any
+// unknown value) is mapped to Premium below rather than accepted here, so the
+// form never submits a retired id that validation would reject.
 function isValidPackageId(s: string): s is PackageId {
-  return s === 'standard' || s === 'comprehensive' || s === 'premium'
+  return s === 'standard' || s === 'premium'
 }
 
 // Stripe Checkout is a full-page redirect, so a cancelled payment lands back on a
@@ -68,7 +71,8 @@ export function CheckoutForm() {
 
   const initialPackageId: PackageId = useMemo(() => {
     const p = search.get('package') ?? ''
-    return isValidPackageId(p) ? p : 'comprehensive'
+    // Default (and legacy 'comprehensive' fallback) is Premium, the recommended tier.
+    return isValidPackageId(p) ? p : 'premium'
   }, [search])
 
   const [form, setForm] = useState<BookingFormData>(() => emptyForm(initialPackageId))
@@ -78,7 +82,7 @@ export function CheckoutForm() {
   // Bumped to force ScheduleSlot to re-check availability (e.g. after a 409).
   const [availabilityRefresh, setAvailabilityRefresh] = useState(0)
 
-  const pkg = PACKAGES.find((p) => p.id === form.packageId) ?? PACKAGES[1]
+  const pkg = resolvePackage(form.packageId)
   const travelFee = travelFeeForEmirate(form.emirate)
   const distance = distanceClassForEmirate(form.emirate)
   const total = pkg.price + travelFee

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: '%s | Crescent Car Check',
   },
   description:
-    'Book an independent pre-purchase car inspection across the UAE. Up to 600 check points, on-site at the seller, same-day digital report. Available in Dubai, Abu Dhabi, Sharjah and all Emirates.',
+    'Book an independent pre-purchase car inspection across the UAE, on-site at the seller, with a same-day digital report. Available in Dubai, Abu Dhabi, Sharjah and all Emirates.',
   keywords: [
     'car inspection UAE', 'pre-purchase car inspection Dubai',
     'used car inspection', 'vehicle inspection UAE', 'car check UAE',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: 'Crescent Car Check',
     title: 'Crescent Car Check | Professional Car Inspections in UAE',
     description:
-      'Independent pre-purchase car inspections across the UAE. Up to 600 check points. Same-day digital reports. From AED 249.',
+      'Independent pre-purchase car inspections across the UAE. Same-day digital reports. From AED 299.',
     // og:image is provided automatically by app/opengraph-image.tsx
   },
   twitter: {

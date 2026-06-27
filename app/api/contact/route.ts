@@ -107,14 +107,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const name = body.name?.trim() ?? ''
-  const email = body.email?.trim() ?? ''
-  const message = body.message?.trim() ?? ''
-  const phone = body.phone?.trim() ?? ''
-  const carMake = body.carMake?.trim() ?? ''
-  const carModel = body.carModel?.trim() ?? ''
-  const carYear = body.carYear?.trim() ?? ''
-  const topicRaw = body.topic?.trim() ?? ''
+  // `body` is a type ASSERTION, not validated, so a crafted POST can send a
+  // non-string (number/object) for any field. Optional chaining only guards
+  // null/undefined: `(1)?.trim()` would throw an uncaught TypeError → opaque 500.
+  // Coerce every field to a string first so validation returns a clean 422.
+  const str = (v: unknown): string => (typeof v === 'string' ? v : '')
+  const name = str(body.name).trim()
+  const email = str(body.email).trim()
+  const message = str(body.message).trim()
+  const phone = str(body.phone).trim()
+  const carMake = str(body.carMake).trim()
+  const carModel = str(body.carModel).trim()
+  const carYear = str(body.carYear).trim()
+  const topicRaw = str(body.topic).trim()
 
   if (!name) return NextResponse.json({ ok: false, error: 'Name is required' }, { status: 422 })
   if (name.length > MAX_LEN.name) {

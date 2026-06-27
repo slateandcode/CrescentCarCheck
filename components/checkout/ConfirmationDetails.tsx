@@ -38,22 +38,52 @@ export function ConfirmationDetails() {
 
   useEffect(() => {
     if (!id || !sessionId) return
+    // Capture narrowed (non-null) copies — the early return narrows id/sessionId
+    // here, but that narrowing doesn't carry into the nested poll() closure.
+    const reqId = id
+    const reqSession = sessionId
     let active = true
-    fetch(`/api/bookings/${encodeURIComponent(id)}?session_id=${encodeURIComponent(sessionId)}`)
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('not found'))))
-      .then((data: { ok?: boolean; booking?: BookingSummary }) => {
-        if (!active || !data.ok || !data.booking) return
-        setSummary(data.booking)
-        if (!purchaseTracked.current && data.booking.paymentStatus === 'paid') {
-          purchaseTracked.current = true
-          trackPurchase(data.booking)
-        }
-      })
-      .catch(() => {
-        /* Reference is still shown below; details are a best-effort enhancement. */
-      })
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    // The booking flips to 'paid' via the async Stripe webhook, which routinely
+    // lands a few seconds AFTER this success-redirect page loads. A single fetch
+    // would often read 'pending' and never fire the GA4 purchase event, silently
+    // under-reporting conversions. Poll on a short backoff until it's paid (or the
+    // attempts run out), so the conversion is captured once the webhook catches up.
+    const DELAYS = [0, 2000, 4000, 8000, 15000] // ms before each attempt (~29s total)
+    let attempt = 0
+
+    function scheduleNext() {
+      if (active && !purchaseTracked.current && attempt < DELAYS.length - 1) {
+        attempt += 1
+        timer = setTimeout(poll, DELAYS[attempt])
+      }
+    }
+
+    function poll() {
+      fetch(`/api/bookings/${encodeURIComponent(reqId)}?session_id=${encodeURIComponent(reqSession)}`)
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error('not found'))))
+        .then((data: { ok?: boolean; booking?: BookingSummary }) => {
+          if (!active || !data.ok || !data.booking) return
+          setSummary(data.booking)
+          if (!purchaseTracked.current && data.booking.paymentStatus === 'paid') {
+            purchaseTracked.current = true
+            trackPurchase(data.booking)
+            return // conversion captured — stop polling
+          }
+          scheduleNext() // still pending — try again shortly
+        })
+        .catch(() => {
+          // Network/lookup blip — retry on the same schedule in case it's transient.
+          // Reference is still shown below; details are a best-effort enhancement.
+          scheduleNext()
+        })
+    }
+
+    timer = setTimeout(poll, DELAYS[0])
     return () => {
       active = false
+      if (timer) clearTimeout(timer)
     }
   }, [id, sessionId])
 

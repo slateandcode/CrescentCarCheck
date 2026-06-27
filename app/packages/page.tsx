@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { PackageCard } from '@/components/ui/PackageCard'
 import { CTABanner } from '@/components/home/CTABanner'
 import { FAQ, type FAQItem } from '@/components/home/FAQ'
-import { ComparisonTable } from '@/components/packages/ComparisonTable'
 import { PackageHelpForm } from '@/components/packages/PackageHelpForm'
 import { PaymentMethods } from '@/components/packages/PaymentMethods'
 import { PACKAGES } from '@/lib/packages'
@@ -10,14 +9,14 @@ import { PACKAGES } from '@/lib/packages'
 export const metadata: Metadata = {
   title: 'Inspection Packages & Pricing',
   description:
-    'Compare Crescent Car Check inspection packages: Standard, Comprehensive and Premium. On-site inspection anywhere in the UAE with an instant digital report.',
+    'Compare Crescent Car Check inspection packages: Standard and Premium. On-site inspection anywhere in the UAE with an instant digital report.',
 }
 
 const PACKAGE_FAQS: FAQItem[] = [
   {
     question: 'Which package should I choose?',
     answer:
-      'Standard covers the core checks needed on any everyday used car. Comprehensive is a more detailed inspection for buyers who want extra confidence before committing, with the full underbody, panel gaps, suspension and a buy / negotiate / avoid recommendation. Premium is our most detailed inspection, built for buyers making a high-value purchase, and adds endoscopic camera checks, transmission and AC compressor checks, an extended OBD review, a 20-minute inspector summary call and price negotiation notes.',
+      'Standard covers the full pre-purchase inspection most buyers need — accident history, bodywork and paint meter, chassis, interior and AC, engine bay and fluid leaks, computer diagnostics, battery, electrics, tyres, suspension, transmission and a basic test drive, ending with a buy / negotiate / avoid recommendation. Premium adds the deeper checks for a high-value purchase: a full underbody inspection, an advanced camera check for hidden leaks, brake disc wear, an odometer-tampering assessment, a 10-minute continuous test drive, a 20-minute inspector summary call and price negotiation notes.',
   },
   {
     question: "Do you inspect at the seller's location?",
@@ -63,12 +62,11 @@ export default function PackagesPage() {
       {/* Pricing cards + comparison */}
       <section className="bg-light-bg pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-12 md:pb-24 lg:pb-28">
         <div className="container-wide">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto items-stretch">
             {PACKAGES.map((pkg) => (
               <PackageCard
                 key={pkg.id}
                 pkg={pkg}
-                variant="full"
                 linkHref={`/checkout?package=${pkg.id}`}
               />
             ))}
@@ -79,8 +77,6 @@ export default function PackagesPage() {
           </p>
 
           <PaymentMethods />
-
-          <ComparisonTable />
         </div>
       </section>
 

@@ -38,6 +38,19 @@ function appUrl(req: Request): string {
   return new URL(req.url).origin
 }
 
+/** The request body is a type ASSERTION, not validated, so any field can arrive
+ *  as a non-string at runtime. Coerce text fields to strings before validateForm
+ *  calls .trim() on them — otherwise a crafted `{"customerName": 5}` throws an
+ *  uncaught TypeError and the route 500s instead of returning a clean 422. */
+const asText = (v: unknown): string => (typeof v === 'string' ? v : '')
+
+/** Accept a coordinate only when it's a finite number in range; otherwise null.
+ *  Stops a crafted/garbage lat/lng from 500-ing the RPC (non-numeric → failed
+ *  double-precision coercion) or being stored out of range. The required address
+ *  text still carries the location, so dropping a bad pin never blocks booking. */
+const asCoord = (v: unknown, max: number): number | null =>
+  typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= max ? v : null
+
 export async function POST(req: Request) {
   // Anti-abuse: cap booking attempts per IP. Each accepted attempt reserves one
   // of only 5 daily slots for 30 minutes and opens a live Stripe session, so an
@@ -58,21 +71,24 @@ export async function POST(req: Request) {
 
   // Normalise to the full form shape so the shared validator can run.
   const form: BookingFormData = {
-    customerName: body.customerName ?? '',
-    customerPhone: body.customerPhone ?? '',
-    customerEmail: body.customerEmail ?? '',
-    emirate: body.emirate ?? '',
-    address: body.address ?? '',
-    locationLat: body.locationLat ?? null,
-    locationLng: body.locationLng ?? null,
-    parkingType: body.parkingType ?? '',
-    carMake: body.carMake ?? '',
-    carModel: body.carModel ?? '',
-    carYear: body.carYear ?? '',
-    additionalNotes: body.additionalNotes ?? '',
-    inspectionDate: body.inspectionDate ?? '',
-    slotTime: body.slotTime ?? '',
-    packageId: body.packageId ?? 'comprehensive',
+    customerName: asText(body.customerName),
+    customerPhone: asText(body.customerPhone),
+    customerEmail: asText(body.customerEmail),
+    emirate: asText(body.emirate) as BookingFormData['emirate'],
+    address: asText(body.address),
+    locationLat: asCoord(body.locationLat, 90),
+    locationLng: asCoord(body.locationLng, 180),
+    parkingType: asText(body.parkingType) as BookingFormData['parkingType'],
+    carMake: asText(body.carMake),
+    carModel: asText(body.carModel),
+    carYear: asText(body.carYear),
+    additionalNotes: asText(body.additionalNotes),
+    inspectionDate: asText(body.inspectionDate),
+    slotTime: asText(body.slotTime) as BookingFormData['slotTime'],
+    // Fallback for a malformed request that omits the package. 'comprehensive' is
+    // retired and getPackageById() would reject it (422); default to the recommended
+    // sold tier instead, matching resolvePackage()'s premium fallback.
+    packageId: body.packageId ?? 'premium',
   }
 
   const errors = validateForm(form)

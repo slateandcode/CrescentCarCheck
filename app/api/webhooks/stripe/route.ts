@@ -7,6 +7,7 @@ import {
   getBookingById,
   markBookingCancelled,
   markBookingPaid,
+  markBookingRefunded,
   rowToRecord,
 } from '@/lib/availability'
 import { notifyLatePaymentRefund, notifyPaidBooking } from '@/lib/email'
@@ -165,7 +166,14 @@ async function handlePaid(session: Stripe.Checkout.Session): Promise<void> {
         console.error('[webhook] auto-refund failed — manual refund required', { bookingId }, err)
       }
     }
-    if (existing) await notifyLatePaymentRefund(rowToRecord(existing as Booking), paymentIntentId)
+    // Gate the owner alert on the one-time payment_status → 'refunded' transition
+    // so a Stripe redelivery (at-least-once / dashboard "Resend") of this same
+    // event doesn't re-email. Unlike the happy path, this branch never reaches a
+    // 'paid' state, so without the gate it would re-fire on every delivery.
+    const shouldAlert = await markBookingRefunded(bookingId)
+    if (existing && shouldAlert) {
+      await notifyLatePaymentRefund(rowToRecord(existing as Booking), paymentIntentId)
+    }
     return
   }
 

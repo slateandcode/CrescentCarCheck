@@ -93,7 +93,7 @@ export default function OpengraphImage() {
               borderRadius: 9999,
             }}
           >
-            Up to 600 checks · From AED 249
+            Standard & Premium · From AED 299
           </div>
           <div style={{ display: 'flex', color: '#71717A', fontSize: 26 }}>
             crescentcarcheck.com

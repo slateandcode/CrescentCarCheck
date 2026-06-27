@@ -18,7 +18,7 @@ const EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.
 
 const SERVICES = [
   { href: '/packages', label: 'Pre-Purchase Inspection' },
-  { href: '/packages', label: 'Comprehensive Check' },
+  { href: '/packages', label: 'Standard Inspection' },
   { href: '/packages', label: 'Premium Inspection' },
 ]
 

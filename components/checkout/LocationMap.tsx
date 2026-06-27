@@ -46,6 +46,10 @@ export function LocationMap({ initialCoords, onChange, className }: LocationMapP
   // Session token groups autocomplete keystrokes + the final pick into one
   // billable session; it's regenerated after each selection.
   const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null)
+  // Holds the address written into the input by selectResult(). The autocomplete
+  // effect skips searching while `query` equals it, so picking a result doesn't
+  // immediately re-open the predictions dropdown over the place just chosen.
+  const selectedAddressRef = useRef<string | null>(null)
   const onChangeRef = useRef(onChange)
 
   const [ready, setReady] = useState(false)
@@ -150,6 +154,10 @@ export function LocationMap({ initialCoords, onChange, className }: LocationMapP
   // updates run inside the timer so a short/empty query clears cleanly.
   useEffect(() => {
     if (unavailable) return
+    // `query` was just set programmatically by selecting a result — don't fire a
+    // fresh search (it would re-open the dropdown over the chosen place). Resets
+    // naturally once the user edits the field to anything else.
+    if (selectedAddressRef.current !== null && query === selectedAddressRef.current) return
     const q = query.trim()
     if (q.length < 3) {
       const clear = setTimeout(() => {
@@ -196,6 +204,8 @@ export function LocationMap({ initialCoords, onChange, className }: LocationMapP
       markerRef.current.setPosition({ lat, lng })
       mapRef.current.panTo({ lat, lng })
       mapRef.current.setZoom(16)
+      // Mark this value as programmatic so the autocomplete effect skips it.
+      selectedAddressRef.current = address
       setQuery(address)
       onChangeRef.current?.({ lat, lng }, address)
     } finally {

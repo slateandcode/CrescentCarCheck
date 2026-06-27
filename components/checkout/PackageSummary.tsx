@@ -32,9 +32,9 @@ export function PackageSummary({ pkg, emirate = '', travelFee = 0 }: PackageSumm
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-light-text font-bold text-lg">{pkg.name}</h2>
-        {pkg.popular && (
-          <span className="text-xs font-bold uppercase tracking-wider text-accent">
-            Most Popular
+        {pkg.recommended && (
+          <span className="text-xs font-bold uppercase tracking-wider text-error">
+            Recommended
           </span>
         )}
       </div>
@@ -85,7 +85,7 @@ export function PackageSummary({ pkg, emirate = '', travelFee = 0 }: PackageSumm
 
       <div className="mt-4">
         <p className="text-xs font-semibold text-light-text-secondary uppercase tracking-wider mb-2">
-          {pkg.inspectionPoints} inspection points
+          What&apos;s included
         </p>
         <ul className="space-y-1.5">
           {pkg.features.slice(0, 5).map((f) => (

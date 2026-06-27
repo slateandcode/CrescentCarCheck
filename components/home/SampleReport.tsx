@@ -68,7 +68,7 @@ export function SampleReport() {
             {/* Real first page of a Crescent Car Check inspection report. */}
             <Image
               src="/sample-report-cover.jpg"
-              alt="Sample Crescent Car Check inspection report — cover page for a 2021 Toyota Land Cruiser (Premium 600+ point check), Crescent Score 82 out of 100"
+              alt="Sample Crescent Car Check inspection report — cover page for a 2021 Toyota Land Cruiser (Premium inspection), Crescent Score 82 out of 100"
               fill
               sizes="(min-width: 1024px) 400px, 90vw"
               className="object-cover"

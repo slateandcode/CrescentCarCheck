@@ -15,6 +15,8 @@ export const GA_EVENTS = {
   WHATSAPP_CLICK: 'whatsapp_click',
   PHONE_CLICK: 'phone_click',
   FAQ_OPENED: 'faq_opened',
+  DISCOUNT_POPUP_SHOWN: 'discount_popup_shown',
+  DISCOUNT_CLAIMED: 'discount_claimed',
 } as const
 
 type GAEventName = typeof GA_EVENTS[keyof typeof GA_EVENTS]
