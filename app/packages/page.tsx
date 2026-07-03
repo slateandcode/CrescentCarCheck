@@ -60,7 +60,7 @@ export default function PackagesPage() {
       </section>
 
       {/* Pricing cards + comparison */}
-      <section className="bg-light-bg pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-12 md:pb-24 lg:pb-28">
+      <section className="bg-background pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-12 md:pb-24 lg:pb-28">
         <div className="container-wide">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto items-stretch">
             {PACKAGES.map((pkg) => (
@@ -72,7 +72,7 @@ export default function PackagesPage() {
             ))}
           </div>
 
-          <p className="text-center text-light-text-muted text-sm mt-8">
+          <p className="text-center text-text-secondary text-sm mt-8">
             All prices inclusive of VAT. Payment secured by Stripe. No hidden fees.
           </p>
 

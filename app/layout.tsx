@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { WhatsAppButton } from '@/components/layout/WhatsAppButton'
@@ -62,6 +62,12 @@ export const metadata: Metadata = {
     description: 'Professional car inspections across the UAE. Book online.',
   },
   robots: { index: true, follow: true },
+  // Google Search Console ownership proof (renders <meta name="google-site-verification">).
+  // Only needed for the "HTML tag" verification method — a DNS TXT record on the
+  // domain works without this. Unset = tag omitted.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   // Favicon + icon come from the app/favicon.ico and app/icon.png file
   // conventions (both generated from public/Crescent.png).
 }
@@ -78,6 +84,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: ANIM_GATE_SCRIPT }} />
       </head>
+      {/* GTM loads after hydration (afterInteractive) — doesn't block first paint.
+          If GA4 is ever configured INSIDE this GTM container, unset
+          NEXT_PUBLIC_GA_MEASUREMENT_ID below or pageviews double-count. */}
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      )}
       <body>
         <Navbar />
         <main id="main-content">{children}</main>
