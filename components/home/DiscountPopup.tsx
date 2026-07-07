@@ -163,7 +163,9 @@ export function DiscountPopup() {
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <div className="relative aspect-[16/9] w-full">
+        {/* Aspect ratio matches the source image (~28:15) so object-cover doesn't
+            crop the sides — the top-left Crescent logo was being clipped in a 16:9 box. */}
+        <div className="relative aspect-[28/15] w-full">
           <Image
             src={POPUP_IMAGE}
             alt="Crescent Car Check — premium pre-purchase car inspection in Dubai"

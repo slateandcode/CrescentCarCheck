@@ -2,15 +2,22 @@
 
 import { memo } from 'react'
 import Link from 'next/link'
-import { Check, X } from 'lucide-react'
+import { Check, X, Phone } from 'lucide-react'
 import type { Package, PackageFeature } from '@/types/booking'
-import { cn } from '@/lib/utils'
+import { cn, telHref } from '@/lib/utils'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
+import { WhatsAppGlyph } from '@/components/layout/SocialIcons'
+
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
 
 interface PackageCardProps {
   pkg: Package
   /** Where the CTA links; defaults to the package's checkout URL. */
   linkHref?: string
+  /** When set, show the WhatsApp / Call Now / online-checkout CTA stack
+   *  (used on the Packages page) instead of the single "Book now" button. */
+  contactCtas?: boolean
   onSelect?: (pkg: Package) => void
 }
 
@@ -40,8 +47,12 @@ function FeatureItem({ label, included }: PackageFeature) {
   )
 }
 
-function PackageCardComponent({ pkg, linkHref, onSelect }: PackageCardProps) {
+function PackageCardComponent({ pkg, linkHref, contactCtas, onSelect }: PackageCardProps) {
   const isPremium = Boolean(pkg.recommended)
+  const checkoutHref = linkHref ?? `/checkout?package=${pkg.id}`
+  const waHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+    `Hi Crescent Car Check, I'd like to book the ${pkg.name} Inspection (AED ${pkg.price}).`,
+  )}`
 
   const handleCtaClick = () => {
     trackEvent(GA_EVENTS.SELECT_PACKAGE, {
@@ -101,13 +112,47 @@ function PackageCardComponent({ pkg, linkHref, onSelect }: PackageCardProps) {
       </div>
 
       <div className="mt-2 flex-1 flex flex-col justify-end">
-        <Link
-          href={linkHref ?? `/checkout?package=${pkg.id}`}
-          onClick={handleCtaClick}
-          className="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3.5 text-base font-bold text-background shadow-[0_8px_24px_rgba(255,198,0,0.22)] transition-colors duration-200 hover:bg-accent-hover"
-        >
-          {pkg.ctaLabel}
-        </Link>
+        {contactCtas ? (
+          <div className="space-y-3">
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent(GA_EVENTS.WHATSAPP_CLICK, { source: 'packages' })}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-accent px-6 py-3.5 text-base font-bold text-background shadow-[0_8px_24px_rgba(255,198,0,0.22)] transition-colors duration-200 hover:bg-accent-hover"
+            >
+              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#25D366]">
+                <WhatsAppGlyph className="h-3.5 w-3.5 text-white" />
+              </span>
+              Book on WhatsApp
+            </a>
+            <a
+              href={telHref(PHONE)}
+              onClick={() => trackEvent(GA_EVENTS.PHONE_CLICK, { source: 'packages' })}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-light-border bg-light-card px-6 py-3.5 text-base font-bold text-light-text transition-colors duration-200 hover:border-light-border-hover hover:bg-light-surface"
+            >
+              <Phone className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+              Call Now
+            </a>
+            <div className="text-center">
+              <Link
+                href={checkoutHref}
+                onClick={handleCtaClick}
+                className="text-sm font-medium text-light-text-secondary underline decoration-light-border underline-offset-2 transition-colors hover:text-light-text"
+              >
+                Prefer online checkout? Book &amp; Pay Online
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href={checkoutHref}
+            onClick={handleCtaClick}
+            className="inline-flex w-full items-center justify-center rounded-xl bg-accent px-6 py-3.5 text-base font-bold text-background shadow-[0_8px_24px_rgba(255,198,0,0.22)] transition-colors duration-200 hover:bg-accent-hover"
+          >
+            {pkg.ctaLabel}
+          </Link>
+        )}
       </div>
     </div>
   )

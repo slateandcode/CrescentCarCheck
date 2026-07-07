@@ -68,6 +68,7 @@ export default function PackagesPage() {
                 key={pkg.id}
                 pkg={pkg}
                 linkHref={`/checkout?package=${pkg.id}`}
+                contactCtas
               />
             ))}
           </div>

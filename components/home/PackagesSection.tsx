@@ -27,6 +27,7 @@ export function PackagesSection() {
               key={pkg.id}
               pkg={pkg}
               linkHref={`/checkout?package=${pkg.id}`}
+              contactCtas
             />
           ))}
         </div>

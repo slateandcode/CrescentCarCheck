@@ -174,8 +174,14 @@ export function RecentlyInspected() {
     setActive(nearest)
   }
 
+  // Reduced top padding: the preceding Packages section already carries a full
+  // bottom pad + the payment-methods bar, so the default section-padding on top
+  // left a large empty gap before this heading.
   return (
-    <section id="recently-inspected" className="bg-background section-padding scroll-mt-24">
+    <section
+      id="recently-inspected"
+      className="bg-background pt-6 sm:pt-8 md:pt-10 pb-16 sm:pb-20 md:pb-24 lg:pb-28 scroll-mt-24"
+    >
       <div ref={ref} className="reveal container-wide">
         <div className="text-center mb-10 md:mb-14">
           <Squiggle />
