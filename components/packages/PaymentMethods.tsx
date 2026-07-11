@@ -18,11 +18,15 @@ const CARD_METHODS: Method[] = [
   { name: 'Apple Pay', imageSrc: '/payments/ApplePay.svg', height: 'h-6 sm:h-7', wordmark: 'Apple Pay' },
 ]
 
-const TABBY: Method = {
-  name: 'Tabby',
-  imageSrc: '/payments/Tabby.webp',
+// Google Pay is offered automatically by Stripe Checkout on eligible
+// Chrome/Android devices when card payments are enabled (same story as Apple
+// Pay above), so the mark is accurate to display. Replaces Tabby, which the
+// business doesn't offer (brief item 5).
+const GOOGLE_PAY: Method = {
+  name: 'Google Pay',
+  imageSrc: '/payments/GooglePay.svg',
   height: 'h-6 sm:h-7',
-  wordmark: 'tabby',
+  wordmark: 'G Pay',
 }
 
 function Mark({ method }: { method: Method }) {
@@ -70,7 +74,7 @@ export function PaymentMethods() {
           ))}
         </span>
         <span className="text-light-text-muted text-sm sm:text-base">or</span>
-        <Mark method={TABBY} />
+        <Mark method={GOOGLE_PAY} />
       </div>
     </div>
   )

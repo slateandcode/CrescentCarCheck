@@ -73,7 +73,7 @@ export function FAQ({
   }
 
   return (
-    <section id="faqs" className="bg-light-bg section-padding scroll-mt-24">
+    <section id="faqs" className="bg-light-bg section-padding scroll-mt-20">
       <div ref={ref} className="reveal container-wide">
         <div className="text-center">
           {label && (

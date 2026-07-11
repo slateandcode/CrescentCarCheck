@@ -90,7 +90,7 @@ export function Navbar() {
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 md:h-24 gap-3">
+          <div className="flex items-center justify-between h-16 md:h-[4.5rem] gap-3">
             <Link
               href="/"
               aria-label="Crescent Car Check home"
@@ -108,7 +108,7 @@ export function Navbar() {
                   className={cn(
                     'text-sm font-medium whitespace-nowrap transition-colors duration-200',
                     isActive(link.href)
-                      ? 'text-text-primary'
+                      ? 'text-accent'
                       : 'text-text-secondary hover:text-text-primary'
                   )}
                 >
@@ -180,7 +180,7 @@ export function Navbar() {
           aria-label="Site menu"
           className="fixed inset-0 z-50 bg-background flex flex-col animate-slide-in-right lg:hidden"
         >
-          <div className="flex items-center justify-between h-20 px-4 border-b border-border">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Crescent Car Check home">
               <Logo />
             </Link>

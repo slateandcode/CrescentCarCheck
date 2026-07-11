@@ -180,7 +180,7 @@ export function RecentlyInspected() {
   return (
     <section
       id="recently-inspected"
-      className="bg-background pt-6 sm:pt-8 md:pt-10 pb-16 sm:pb-20 md:pb-24 lg:pb-28 scroll-mt-24"
+      className="bg-background pt-6 sm:pt-8 md:pt-10 pb-16 sm:pb-20 md:pb-24 lg:pb-28 scroll-mt-20"
     >
       <div ref={ref} className="reveal container-wide">
         <div className="text-center mb-10 md:mb-14">

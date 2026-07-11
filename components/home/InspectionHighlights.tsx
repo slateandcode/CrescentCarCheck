@@ -120,7 +120,9 @@ export function InspectionHighlights() {
 
         {/* Annotated car + (on phones) a legend — both draw on when scrolled into view */}
         <div ref={cardRef} className="annotated-card">
-          <div className="hero-card relative w-full aspect-[4/3] xs:aspect-[3/2] sm:aspect-[2/1] rounded-card-lg border border-light-border bg-light-card overflow-hidden">
+          {/* isolate: the internal z-10..z-40 layers must not leak into the page
+              stacking context (they were painting over the fixed pricing teaser). */}
+          <div className="hero-card relative isolate w-full aspect-[4/3] xs:aspect-[3/2] sm:aspect-[2/1] rounded-card-lg border border-light-border bg-light-card overflow-hidden">
             <div className="hero-card-glow" aria-hidden="true" />
 
             {/* Car */}

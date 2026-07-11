@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
+const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 const BUSINESS_EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.com'
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
 
 const NEXT_STEPS = [
   {

@@ -11,9 +11,9 @@ export const metadata: Metadata = {
     'Get in touch with Crescent Car Check. WhatsApp, phone, email, or fill in the form — we reply quickly across the UAE.',
 }
 
-const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
+const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 const BUSINESS_EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.com'
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
 
 const CONTACT_METHODS = [
   {
@@ -128,7 +128,7 @@ export default function ContactPage() {
             </div>
 
             {/* Sidebar: hours + coverage */}
-            <aside className="order-1 lg:order-2 lg:sticky lg:top-28 space-y-5">
+            <aside className="order-1 lg:order-2 lg:sticky lg:top-[5.5rem] space-y-5">
               <div className="bg-light-card rounded-card border border-light-border p-5 sm:p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <span

@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
-import { WhatsAppButton } from '@/components/layout/WhatsAppButton'
+import { FloatingContactButtons } from '@/components/layout/WhatsAppButton'
 import './globals.css'
 
 const inter = Inter({
@@ -94,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main id="main-content">{children}</main>
         <Footer />
-        <WhatsAppButton />
+        <FloatingContactButtons />
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         )}

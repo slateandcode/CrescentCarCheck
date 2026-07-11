@@ -31,7 +31,7 @@ export function HowItWorks() {
   const ref = useReveal<HTMLDivElement>()
 
   return (
-    <section id="how-it-works" className="bg-light-bg section-padding relative scroll-mt-24">
+    <section id="how-it-works" className="bg-light-bg section-padding relative scroll-mt-20">
       <div ref={ref} className="reveal container-wide relative">
         <div className="max-w-2xl">
           <h2 className="text-display-sm md:text-display-md font-bold text-light-text">

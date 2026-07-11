@@ -67,8 +67,9 @@
     @apply py-16 sm:py-20 md:py-24 lg:py-28;
   }
 
+  /* Clears the fixed navbar (h-16 / md:h-[4.5rem] = 64 / 72px) plus breathing room. */
   .page-header {
-    @apply pt-24 pb-12 sm:pt-28 sm:pb-16 md:pt-32 md:pb-20;
+    @apply pt-20 pb-12 sm:pt-24 sm:pb-16 md:pt-28 md:pb-20;
   }
 
   .container-wide {
@@ -465,6 +466,19 @@
   .hero-price-card {
     animation: none;
   }
+}
+
+/* Hero slide photos are object-contain (never cropped) and centered. Their
+   hard-cut edges (Endoscopic's right, Tablet's bottom) are feathered to alpha 0
+   in the source PNGs, so no object-position anchor is load-bearing — the subject
+   dissolves into the panel wherever it lands, including mid-slide-transition. */
+
+/* While the scroll-triggered pricing teaser is pinned it covers/replaces the
+   floating WhatsApp + phone buttons (all widths — desktop mirrors phone);
+   dismissing it (X) fades them back in. */
+body.price-teaser-open .floating-cta {
+  opacity: 0;
+  pointer-events: none;
 }
 @keyframes hero-panel-in {
   from { opacity: 0; transform: translateY(24px); }

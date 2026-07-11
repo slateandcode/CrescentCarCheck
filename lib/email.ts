@@ -138,8 +138,8 @@ function bookingTable(record: BookingRecord, paid?: PaidAmounts): string {
   </table>`
 }
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
-const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
+const BUSINESS_PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 
 /**
  * Sent ONLY after Stripe confirms payment (from the webhook). Emails the owner a

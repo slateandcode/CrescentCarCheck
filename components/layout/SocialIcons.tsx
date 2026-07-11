@@ -8,7 +8,7 @@ export const INSTAGRAM_URL =
   process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/crescentcarcheck/'
 export const TIKTOK_URL =
   process.env.NEXT_PUBLIC_TIKTOK_URL || 'https://www.tiktok.com/@crescent.car.check'
-export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
 
 export function InstagramGlyph({ className }: { className?: string }) {
   return (

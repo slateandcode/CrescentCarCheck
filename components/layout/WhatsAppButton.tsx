@@ -1,13 +1,22 @@
 'use client'
 
+import { Phone } from 'lucide-react'
+import { telHref } from '@/lib/utils'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
 
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
+const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 const PREFILLED_MESSAGE =
   "Hi Crescent Car Check, I'd like to send you a car listing for a pre-purchase inspection."
 
-export function WhatsAppButton() {
-  const handleClick = () => {
+/**
+ * Floating WhatsApp + phone buttons pinned to the bottom-right (brief item 3).
+ * The `floating-cta` class lets the home page's pricing teaser replace them while
+ * it is pinned (body.price-teaser-open in globals.css); dismissing the teaser
+ * brings them back.
+ */
+export function FloatingContactButtons() {
+  const handleWhatsApp = () => {
     trackEvent(GA_EVENTS.WHATSAPP_CLICK)
     const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(PREFILLED_MESSAGE)}`
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -15,7 +24,7 @@ export function WhatsAppButton() {
 
   return (
     <div
-      className="fixed right-4 sm:right-6 z-40"
+      className="floating-cta fixed right-4 sm:right-6 z-40 flex flex-col items-end gap-2.5 transition-opacity duration-200"
       style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
     >
       <div className="relative inline-block">
@@ -26,7 +35,7 @@ export function WhatsAppButton() {
         />
         <button
           type="button"
-          onClick={handleClick}
+          onClick={handleWhatsApp}
           aria-label="WhatsApp us"
           className="
             relative z-10 inline-flex items-center cursor-pointer
@@ -49,6 +58,24 @@ export function WhatsAppButton() {
           </span>
         </button>
       </div>
+
+      <a
+        href={telHref(PHONE)}
+        onClick={() => trackEvent(GA_EVENTS.PHONE_CLICK, { source: 'floating' })}
+        aria-label="Call us"
+        className="
+          inline-flex items-center cursor-pointer
+          rounded-full bg-[#25D366] text-white shadow-lg
+          hover:scale-[1.04] transition-transform duration-200
+          h-12 w-12 justify-center gap-0
+          md:h-12 md:w-auto md:justify-start md:gap-2.5 md:pl-3.5 md:pr-5
+        "
+      >
+        <Phone className="w-6 h-6 md:w-5 md:h-5 flex-shrink-0" aria-hidden="true" />
+        <span className="hidden md:inline text-sm font-semibold whitespace-nowrap">
+          Call Us
+        </span>
+      </a>
     </div>
   )
 }

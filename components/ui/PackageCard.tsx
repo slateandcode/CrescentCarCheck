@@ -8,8 +8,8 @@ import { cn, telHref } from '@/lib/utils'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
 import { WhatsAppGlyph } from '@/components/layout/SocialIcons'
 
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
-const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
+const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 
 interface PackageCardProps {
   pkg: Package

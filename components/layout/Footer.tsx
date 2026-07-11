@@ -11,7 +11,7 @@ import {
   WHATSAPP_NUMBER,
 } from './SocialIcons'
 
-const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314'
+const PHONE = process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010'
 const EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.com'
 // Instagram + TikTok are only rendered once the client provides a real handle,
 // so we never ship a dead href="#" link that just jumps to the top of the page.

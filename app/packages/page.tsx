@@ -44,7 +44,7 @@ export default function PackagesPage() {
   return (
     <>
       {/* Header */}
-      <section className="bg-background pt-24 sm:pt-28 md:pt-32 pb-6 sm:pb-8 md:pb-10">
+      <section className="bg-background pt-20 sm:pt-24 md:pt-28 pb-6 sm:pb-8 md:pb-10">
         <div className="container-wide">
           <div className="max-w-3xl">
             <h1 className="text-display-md sm:text-display-lg md:text-display-xl font-black text-text-primary leading-[1.05] md:leading-[1.02] break-words">

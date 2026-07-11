@@ -420,7 +420,7 @@ export function CheckoutForm() {
         </div>
 
         {/* Right: sticky summary (desktop only) */}
-        <div className="hidden lg:block lg:sticky lg:top-24">
+        <div className="hidden lg:block lg:sticky lg:top-[5.5rem]">
           <PackageSummary pkg={pkg} emirate={form.emirate} travelFee={travelFee} />
         </div>
       </div>

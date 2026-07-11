@@ -3,15 +3,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
-import { X, MessageCircle, Clock, BadgeCheck } from 'lucide-react'
+import { X, Clock, BadgeCheck } from 'lucide-react'
+import { WhatsAppGlyph } from '@/components/layout/SocialIcons'
 import { trackEvent, GA_EVENTS } from '@/lib/analytics'
 
 // WhatsApp target for the discount claim. Same number as the floating button.
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
 const CLAIM_MESSAGE =
   "Hi Crescent Car Check, I'd like to claim AED 50 off the Premium Package. I understand payment is required within 48 hours to secure this discount."
 
-// Client-supplied discount banner (landscape: logo + car + sample report).
+// Client-supplied discount banner. The updated art fades to white at the bottom
+// so it blends into the white card (brief: white is more inviting than black).
 const POPUP_IMAGE = '/discount-popup.jpg'
 
 const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000
@@ -63,10 +65,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
 function TimeBox({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="min-w-[3rem] rounded-lg border border-border bg-surface px-2 py-1.5 text-center text-2xl font-black tabular-nums text-text-primary">
+      <span className="min-w-[3rem] rounded-lg border border-black/15 bg-white px-2 py-1.5 text-center text-2xl font-black tabular-nums text-[#0A0A0A] shadow-sm">
         {pad(value)}
       </span>
-      <span className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+      <span className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#0A0A0A]/50">
         {label}
       </span>
     </div>
@@ -152,7 +154,7 @@ export function DiscountPopup() {
         ref={dialogRef}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md overflow-hidden rounded-card-lg border border-border bg-background shadow-glow animate-scale-in focus:outline-none"
+        className="relative w-full max-w-md overflow-hidden rounded-card-lg bg-white shadow-2xl ring-1 ring-black/10 animate-scale-in focus:outline-none"
       >
         <button
           type="button"
@@ -163,55 +165,56 @@ export function DiscountPopup() {
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        {/* Aspect ratio matches the source image (~28:15) so object-cover doesn't
-            crop the sides — the top-left Crescent logo was being clipped in a 16:9 box. */}
-        <div className="relative aspect-[28/15] w-full">
+        {/* The updated banner is ~16:9 and already fades to white at its bottom
+            edge, so it dissolves into the card with no overlay needed. */}
+        <div className="relative aspect-[16/9] w-full">
           <Image
             src={POPUP_IMAGE}
             alt="Crescent Car Check — premium pre-purchase car inspection in Dubai"
             fill
             sizes="(max-width: 640px) 100vw, 448px"
             className="object-cover object-center"
-            priority
+            preload
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         </div>
 
-        <div className="px-6 pb-6 -mt-6 relative">
-          <h2 className="text-2xl font-black leading-tight text-text-primary">
-            Get <span className="text-accent">AED 50</span> Off
+        <div className="px-6 pb-6 -mt-5 relative">
+          <h2 className="text-2xl font-black leading-tight text-[#0A0A0A]">
+            Get <span className="text-[#C98A00]">AED 50</span> Off
             <br />
             Premium Inspection
           </h2>
-          <p className="mt-1.5 text-sm text-text-secondary">
+          <p className="mt-1.5 text-sm text-[#0A0A0A]/70">
             Claim your discount and reserve it for 48 hours.
           </p>
 
-          <div className="mt-4 flex items-center gap-2 text-xs font-medium text-accent">
+          <div className="mt-4 flex items-center gap-2 text-xs font-medium text-[#C98A00]">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             Offer reserved for 48 hours
           </div>
           <div className="mt-2 flex items-start justify-center gap-3">
             <TimeBox value={time.hours} label="Hours" />
-            <span className="pt-1.5 text-2xl font-black text-text-muted">:</span>
+            <span className="pt-1.5 text-2xl font-black text-[#0A0A0A]/40">:</span>
             <TimeBox value={time.minutes} label="Minutes" />
-            <span className="pt-1.5 text-2xl font-black text-text-muted">:</span>
+            <span className="pt-1.5 text-2xl font-black text-[#0A0A0A]/40">:</span>
             <TimeBox value={time.seconds} label="Seconds" />
           </div>
 
           <button
             type="button"
             onClick={handleClaim}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-button bg-accent px-6 py-3.5 text-base font-bold text-background transition-colors hover:bg-accent-hover"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2.5 rounded-button bg-accent px-6 py-3.5 text-base font-bold text-[#0A0A0A] transition-colors hover:bg-accent-hover"
           >
-            <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#25D366]">
+              <WhatsAppGlyph className="h-3.5 w-3.5 text-white" />
+            </span>
             Claim Discount on WhatsApp
           </button>
-          <p className="mt-2 text-center text-[11px] text-text-muted">
+          <p className="mt-2 text-center text-[11px] text-[#0A0A0A]/55">
             Opens WhatsApp with your claim message.
           </p>
 
-          <div className="mt-4 flex items-start gap-1.5 border-t border-border pt-3 text-[11px] leading-snug text-text-muted">
+          <div className="mt-4 flex items-start gap-1.5 border-t border-black/10 pt-3 text-[11px] leading-snug text-[#0A0A0A]/60">
             <BadgeCheck className="mt-px h-3.5 w-3.5 flex-shrink-0 text-success" aria-hidden="true" />
             <span>
               Valid for Premium Inspection only. Discount must be used within 48 hours of claiming.

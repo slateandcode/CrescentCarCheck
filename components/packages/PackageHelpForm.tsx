@@ -32,7 +32,7 @@ const REASONS = [
   'Other',
 ] as const
 
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971502526314'
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '971588425010'
 
 type Form = {
   name: string
@@ -205,7 +205,7 @@ export function PackageHelpForm() {
       <div className="container-wide">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-10 lg:gap-16 items-start">
           {/* Left: reassurance copy */}
-          <div className="lg:sticky lg:top-28">
+          <div className="lg:sticky lg:top-[5.5rem]">
             <h2 className="text-display-sm md:text-display-md font-bold text-text-primary leading-tight">
               Not Sure? <span className="text-accent">Contact Us.</span>
             </h2>
@@ -389,7 +389,7 @@ export function PackageHelpForm() {
                       Ask Which Package Fits
                     </Button>
                     <a
-                      href={telHref(process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 502526314')}
+                      href={telHref(process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+971 58 842 5010')}
                       className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-light-text-secondary hover:text-light-text transition-colors duration-150"
                     >
                       <Phone className="w-4 h-4" aria-hidden="true" />
