@@ -58,7 +58,13 @@ const SLIDES: Slide[] = [
     // column and the contained van renders width-tight — whole van, smaller.
     photoSlot: 'aspect-[1126/605] lg:aspect-auto',
     desktopCols: 'lg:grid-cols-[minmax(0,28rem)_1fr] xl:grid-cols-[minmax(0,34rem)_1fr]',
-    photoInset: 'inset-0',
+    // lg/2xl bottom raise: the width-tight van renders shorter than the
+    // endoscopic scene, so grounded on the panel border it sat visibly lower
+    // than the Audi. Lifting its box bottom puts the two roofs on the same line
+    // slide to slide (client feedback 2026-07-12) — a bigger lift at 2xl because
+    // the height gap between the two renders grows with the photo column.
+    // Mobile keeps it grounded at inset-0.
+    photoInset: 'inset-0 lg:bottom-24 2xl:bottom-40',
   },
   {
     id: 'endoscopic',
@@ -90,18 +96,26 @@ const SLIDES: Slide[] = [
     image: '/hero-tablet2.png',
     alt: 'Crescent inspector reviewing a digital inspection report on a tablet',
     title: 'Fast Digital Reports, Built While We Inspect',
-    highlight: 'Powered by proprietary inspection software',
+    // No "inspection": it wrapped the highlight to two lines on mobile, pushing
+    // this slide's WhatsApp button out of line with the other slides' (client
+    // feedback 2026-07-12 — must read as one line).
+    highlight: 'Powered by proprietary software',
     body: 'Our software ensures nothing is missed by guiding every check, scoring each key area, and generating a clear report with photos, issue notes and a Buy, Negotiate or Avoid recommendation.',
-    // Taller than the other slides' slots (the track sizes to the tallest slide,
-    // so the difference becomes a small gap under the landscape photos).
-    photoSlot: 'h-80 sm:h-[26rem]',
+    // Aspect-locked like the landscape slides (16/9 sits between their 1.86 and
+    // 1.80), so all three slides' natural heights match at every mobile width.
+    // The old taller fixed-height slot stretched the track, and the slack landed
+    // as blank space between the other slides' CTA and photo (client feedback
+    // 2026-07-12: shorten the mobile image block). lg unlocks for self-stretch
+    // like the others.
+    photoSlot: 'aspect-[16/9] lg:aspect-auto',
     desktopCols: 'lg:grid-cols-[minmax(0,28rem)_1fr] xl:grid-cols-[minmax(0,34rem)_1fr]',
-    // Oversize past the slot bottom so the baked 230px waist fade is clipped
-    // away and the man ends solid, cut by the carousel's lower edge — and
-    // renders ~25% bigger. Desktop hangs 10rem below the panel border; the
-    // lg top inset shrinks the height-tight render ~11% so he sits in scale
-    // with the (also scaled-down) car slides instead of filling the band.
-    photoInset: 'inset-x-0 top-0 -bottom-24 lg:top-24 lg:-bottom-40',
+    // Oversize past the slot bottom so the portrait render is CROPPED below the
+    // hands (client's mobile crop) instead of shrunk to the short slot — and the
+    // baked 230px waist fade is clipped away, the man ending solid at the
+    // carousel's lower edge. Desktop is unchanged: hangs 10rem below the panel
+    // border; the lg top inset shrinks the height-tight render ~11% so he sits
+    // in scale with the (also scaled-down) car slides instead of filling the band.
+    photoInset: 'inset-x-0 top-0 -bottom-32 sm:-bottom-44 lg:top-24 lg:-bottom-40',
   },
 ]
 
