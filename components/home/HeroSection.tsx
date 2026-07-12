@@ -64,7 +64,7 @@ const SLIDES: Slide[] = [
     // slide to slide (client feedback 2026-07-12) — a bigger lift at 2xl because
     // the height gap between the two renders grows with the photo column.
     // Mobile keeps it grounded at inset-0.
-    photoInset: 'inset-0 lg:bottom-24 2xl:bottom-40',
+    photoInset: 'inset-0 lg:bottom-24 2xl:bottom-32',
   },
   {
     id: 'endoscopic',
