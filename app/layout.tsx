@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import Script from 'next/script'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -99,6 +98,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`scroll-smooth ${inter.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: ANIM_GATE_SCRIPT }} />
+        {/* Google tag (gtag.js) — plain <script> tags (not next/script) so the
+            snippet is in the raw HTML <head>, where the ads agency's Google
+            tag checker looks for it. Async, so first paint isn't blocked. */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
+        />
+        <script dangerouslySetInnerHTML={{ __html: GOOGLE_ADS_INIT }} />
       </head>
       {/* GTM loads after hydration (afterInteractive) — doesn't block first paint.
           If GA4 is ever configured INSIDE this GTM container, unset
@@ -114,16 +121,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         )}
-        <Script
-          id="google-ads"
-          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script
-          id="google-ads-init"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{ __html: GOOGLE_ADS_INIT }}
-        />
       </body>
     </html>
   )
