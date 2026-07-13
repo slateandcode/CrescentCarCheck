@@ -7,7 +7,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://crescentcarcheck.co
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date()
 
-  // Public, indexable routes only. /confirmation is noindex and /api is excluded.
+  // Public, indexable routes only. /confirmation and /thank-you are noindex
+  // and /api is excluded.
   const routes: Array<{
     path: string
     priority: number

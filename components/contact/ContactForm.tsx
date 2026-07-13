@@ -1,7 +1,8 @@
 'use client'
 
 import { useId, useState } from 'react'
-import { Send, CheckCircle2, ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Send } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Field, inputBase, selectClass, selectChevronStyle, fieldBorder } from '@/components/ui/Field'
 import { Button } from '@/components/ui/Button'
@@ -62,10 +63,10 @@ function validate(form: Form): Errors {
 
 export function ContactForm() {
   const baseId = useId()
+  const router = useRouter()
   const [form, setForm] = useState<Form>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
   const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const id = (k: keyof Form) => `${baseId}-${k}`
@@ -110,45 +111,14 @@ export function ContactForm() {
         return
       }
       trackEvent(GA_EVENTS.CONTACT_SUBMITTED, { form: 'contact', topic: form.topic })
-      setSubmitted(true)
+      // Redirect to the dedicated thank-you page (Google Ads counts its page
+      // views as form-lead conversions). Leave `submitting` true so the button
+      // stays in its loading state until the navigation completes.
+      router.push('/thank-you')
     } catch {
       setSubmitting(false)
       setSubmitError('Network error. Please check your connection and try again.')
     }
-  }
-
-  const reset = () => {
-    setSubmitted(false)
-    setSubmitting(false)
-    setForm(EMPTY)
-    setErrors({})
-    setSubmitError(null)
-  }
-
-  if (submitted) {
-    return (
-      <div className="text-center py-8">
-        <div
-          className="w-14 h-14 rounded-full bg-success-muted flex items-center justify-center mx-auto"
-          aria-hidden="true"
-        >
-          <CheckCircle2 className="w-7 h-7 text-success" />
-        </div>
-        <h3 className="text-light-text text-xl font-bold mt-4">Message sent</h3>
-        <p className="text-light-text-secondary text-sm mt-2 max-w-md mx-auto leading-relaxed">
-          Thanks for reaching out. We&apos;ll reply within a few hours — usually faster on
-          weekdays. Check your inbox (and spam folder, just in case).
-        </p>
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:gap-2.5 transition-all duration-200 mt-6"
-        >
-          Send another message
-          <ArrowRight className="w-4 h-4" aria-hidden="true" />
-        </button>
-      </div>
-    )
   }
 
   return (

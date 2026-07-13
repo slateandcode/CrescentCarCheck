@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -78,6 +79,21 @@ export const metadata: Metadata = {
 const ANIM_GATE_SCRIPT =
   "document.documentElement.classList.add('js-anim-ready')"
 
+// Google Ads tag (client's ads agency, July 2026). Conversions are tracked as
+// page views of /thank-you (contact form) and /confirmation (paid checkout),
+// so this must load on every page. The ID is public in the page source anyway;
+// hardcoded fallback means no Netlify env change is needed to ship it.
+const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || 'AW-18241741781'
+
+// Shares window.dataLayer / gtag with the GA4 snippet rendered by
+// <GoogleAnalytics> below — Google's standard multi-product setup.
+const GOOGLE_ADS_INIT = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${GOOGLE_ADS_ID}');
+`
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`scroll-smooth ${inter.variable}`} suppressHydrationWarning>
@@ -98,6 +114,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
         )}
+        <Script
+          id="google-ads"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-ads-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{ __html: GOOGLE_ADS_INIT }}
+        />
       </body>
     </html>
   )

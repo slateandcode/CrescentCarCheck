@@ -7,11 +7,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // /api holds only POST endpoints. /confirmation is intentionally NOT
-      // disallowed: the page already sets `noindex`, and a robots.txt Disallow
-      // would stop crawlers from fetching it and ever seeing that noindex —
-      // letting a shared URL surface as a bare listing. Crawlable + noindex
-      // gets it fully dropped instead.
+      // /api holds only POST endpoints. /confirmation and /thank-you are
+      // intentionally NOT disallowed: those pages already set `noindex`, and a
+      // robots.txt Disallow would stop crawlers from fetching them and ever
+      // seeing that noindex — letting a shared URL surface as a bare listing.
+      // Crawlable + noindex gets them fully dropped instead.
       disallow: ['/api/'],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
