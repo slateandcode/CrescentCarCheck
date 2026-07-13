@@ -33,7 +33,7 @@ export default function ThankYouPage() {
             Thank <span className="text-accent">You</span>
           </h1>
           <p className="text-text-secondary text-base md:text-lg mt-5 max-w-lg leading-relaxed">
-            We will reach back to you shortly — usually within a few hours on
+            We will reach back to you shortly, usually within a few hours on
             weekdays. Check your inbox (and spam folder, just in case).
           </p>
 
