@@ -1,4 +1,12 @@
 import type { NextConfig } from 'next'
+import { readFileSync } from 'node:fs'
+
+// The marketing site is the client's static HTML, imported into public/ by
+// scripts/import-static-site.mjs. That script writes the page list here; each
+// /<page> is served from public/<page>/index.html (and / from public/index.html).
+const STATIC_PAGES: string[] = JSON.parse(
+  readFileSync(new URL('./static-site/pages.json', import.meta.url), 'utf8'),
+).pages
 
 // Content-Security-Policy, shipped in REPORT-ONLY first (the staged rollout the
 // audit recommends for a payments+PII site): it reports violations to the browser
@@ -59,6 +67,28 @@ const nextConfig: NextConfig = {
   },
   logging: {
     fetches: { fullUrl: false },
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/index.html' },
+        { source: `/:page(${STATIC_PAGES.join('|')})`, destination: '/:page/index.html' },
+      ],
+      afterFiles: [],
+      fallback: [],
+    }
+  },
+  // Pages from the old Next.js site, retired when the static site replaced it
+  // (client: no online payment, bookings go through WhatsApp first).
+  async redirects() {
+    return [
+      { source: '/packages', destination: '/pricing', permanent: true },
+      { source: '/checkout', destination: '/pricing', permanent: true },
+      { source: '/confirmation', destination: '/', permanent: true },
+      { source: '/contact', destination: '/', permanent: true },
+      { source: '/book-inspection', destination: '/', permanent: true },
+      { source: '/book-inspection/:path*', destination: '/:path*', permanent: true },
+    ]
   },
   async headers() {
     return [
