@@ -11,11 +11,8 @@
 //        - canonical/og URLs from /book-inspection/... to the root domain
 //        - internal links and asset paths to absolute (/pricing, /assets/...),
 //          so they work without trailing slashes
-//        - adds an "About Us" link to the desktop nav and mobile menu
-//   4. Builds public/about/index.html from one of the client's subpages as the
-//      shell (header, menu, footer, dialogs, scripts) + static-site/about.main.html
-//      + the "Brands we inspect" strip lifted from the home page.
-//   5. Writes static-site/pages.json, which next.config.ts reads to route
+//        - adds an "About Us" link (to the Next.js page at app/about) to the desktop nav and mobile menu
+//   4. Writes static-site/pages.json, which next.config.ts reads to route
 //      /<page> to public/<page>/index.html.
 
 import fs from 'node:fs'
@@ -27,7 +24,6 @@ const PUBLIC = path.join(ROOT, 'public')
 const EXTRAS = path.join(ROOT, 'static-site')
 const MANIFEST = path.join(EXTRAS, 'pages.json')
 const DOMAIN = 'https://crescentcarcheck.com'
-const SHELL_PAGE = 'how-it-works'
 
 const fail = (msg) => {
   console.error(`\n✗ ${msg}\n`)
@@ -43,9 +39,8 @@ const pages = fs
   .filter((d) => d.isDirectory() && fs.existsSync(path.join(SRC, d.name, 'index.html')))
   .map((d) => d.name)
   .sort()
-if (pages.includes('about')) fail('The zip now has its own about/ page; decide which About to keep before importing.')
-if (!pages.includes(SHELL_PAGE)) fail(`Shell page ${SHELL_PAGE}/ is missing from the zip; pick another in SHELL_PAGE.`)
-const allPages = [...pages, 'about']
+if (pages.includes('about')) fail('The zip now has its own about/ page, which would clash with the Next.js About page (app/about). Decide which to keep first.')
+const allPages = pages
 
 // ---- 1. clean the previous import --------------------------------------------
 const previous = fs.existsSync(MANIFEST) ? JSON.parse(fs.readFileSync(MANIFEST, 'utf8')).pages : []
@@ -115,27 +110,8 @@ for (const p of pages) {
   write(`${p}/index.html`, transform(fs.readFileSync(path.join(SRC, p, 'index.html'), 'utf8'), `${p}/index.html`))
 }
 
-// ---- 4. about page -----------------------------------------------------------
-let about = transform(fs.readFileSync(path.join(SRC, SHELL_PAGE, 'index.html'), 'utf8'), `${SHELL_PAGE} (about shell)`)
-const title = 'About Us: Independent Car Inspectors in the UAE | Crescent Car Check'
-const desc =
-  'Crescent Car Check helps UAE buyers purchase used cars with confidence. Learn about our inspectors, our values, and why we do what we do.'
-about = mustReplace(about, /<title>[\s\S]*?<\/title>/, `<title>${title}</title>`, '<title>', 'about')
-about = mustReplace(about, /(<meta\s+name="description"\s+content=")[^"]*(")/, `$1${desc}$2`, 'meta description', 'about')
-about = mustReplace(about, /(<meta\s+property="og:title"\s+content=")[^"]*(")/, `$1${title}$2`, 'og:title', 'about')
-about = mustReplace(about, /(<meta\s+property="og:description"\s+content=")[^"]*(")/, `$1${desc}$2`, 'og:description', 'about')
-about = about.replaceAll(`${DOMAIN}/${SHELL_PAGE}`, `${DOMAIN}/about`)
-about = about.replace(/ class="is-active" aria-current="page"/g, '')
-about = about.replace(/<a href="\/about"/g, '<a href="/about" class="is-active" aria-current="page"')
-
-const brands = home.match(/\n\s*<!-- \d+\. BRANDS WE INSPECT -->[\s\S]*?<section\s+class="sec paper brands"[\s\S]*?<\/section>/)
-if (!brands) fail('index.html: couldn\'t find the "Brands we inspect" section to reuse on About.')
-const aboutMain = fs.readFileSync(path.join(EXTRAS, 'about.main.html'), 'utf8').replace('<!-- BRANDS -->', brands[0].trim())
-about = mustReplace(about, /    <main id="top">[\s\S]*?<\/main>\n?/, aboutMain, '<main id="top">', 'about')
-write('about/index.html', about)
-
-// ---- 5. manifest -------------------------------------------------------------
+// ---- 4. manifest -------------------------------------------------------------
 fs.writeFileSync(MANIFEST, JSON.stringify({ source: path.relative(ROOT, SRC), pages: allPages }, null, 2) + '\n')
 
-console.log(`✓ Imported ${pages.length + 1} client pages + about into public/`)
+console.log(`✓ Imported ${pages.length + 1} client pages into public/`)
 console.log(`  routes: / ${allPages.map((p) => '/' + p).join(' ')}`)
