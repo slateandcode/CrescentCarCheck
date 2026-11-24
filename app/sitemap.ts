@@ -14,12 +14,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: number
     changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency']
   }> = [
+    // Static marketing pages (public/, see scripts/import-static-site.mjs).
     { path: '', priority: 1, changeFrequency: 'weekly' },
-    { path: '/packages', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/pricing', priority: 0.9, changeFrequency: 'weekly' },
+    { path: '/what-we-check', priority: 0.8, changeFrequency: 'monthly' },
+    { path: '/how-it-works', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/sample-report', priority: 0.7, changeFrequency: 'monthly' },
-    { path: '/checkout', priority: 0.7, changeFrequency: 'monthly' },
+    { path: '/recently-inspected', priority: 0.7, changeFrequency: 'weekly' },
+    { path: '/reviews', priority: 0.6, changeFrequency: 'weekly' },
+    { path: '/faq', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/about', priority: 0.6, changeFrequency: 'monthly' },
-    { path: '/contact', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/privacy', priority: 0.2, changeFrequency: 'yearly' },
     { path: '/terms', priority: 0.2, changeFrequency: 'yearly' },
   ]
