@@ -29,7 +29,7 @@ export function CTABanner() {
         </p>
 
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 mt-8">
-          <ButtonLink href="/pricing" size="lg" arrow fullWidth className="sm:w-auto">
+          <ButtonLink href="/pricing/" size="lg" arrow fullWidth className="sm:w-auto">
             Book Inspection
           </ButtonLink>
           <ButtonLink href="/#contact" variant="outline" size="lg" fullWidth className="sm:w-auto">

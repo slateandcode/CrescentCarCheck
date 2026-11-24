@@ -17,14 +17,14 @@ const EMAIL = process.env.NEXT_PUBLIC_BUSINESS_EMAIL || 'crescentcarcheck@gmail.
 // so we never ship a dead href="#" link that just jumps to the top of the page.
 
 const SERVICES = [
-  { href: '/pricing', label: 'Pre-Purchase Inspection' },
-  { href: '/pricing', label: 'Standard Inspection' },
-  { href: '/pricing', label: 'Premium Inspection' },
+  { href: '/pricing/', label: 'Pre-Purchase Inspection' },
+  { href: '/pricing/', label: 'Standard Inspection' },
+  { href: '/pricing/', label: 'Premium Inspection' },
 ]
 
 const COMPANY = [
   { href: '/about', label: 'About Us' },
-  { href: '/how-it-works', label: 'How It Works' },
+  { href: '/how-it-works/', label: 'How It Works' },
   { href: '/#contact', label: 'Contact' },
 ]
 
