@@ -159,7 +159,7 @@ export default function AboutPage() {
             </ul>
 
             <div className="mt-8">
-              <ButtonLink href="/pricing" size="lg" arrow>
+              <ButtonLink href="/pricing/" size="lg" arrow>
                 See Our Packages
               </ButtonLink>
             </div>

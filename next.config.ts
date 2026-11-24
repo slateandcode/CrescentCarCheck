@@ -82,8 +82,8 @@ const nextConfig: NextConfig = {
   // (client: no online payment, bookings go through WhatsApp first).
   async redirects() {
     return [
-      { source: '/packages', destination: '/pricing', permanent: true },
-      { source: '/checkout', destination: '/pricing', permanent: true },
+      { source: '/packages', destination: '/pricing/', permanent: true },
+      { source: '/checkout', destination: '/pricing/', permanent: true },
       { source: '/confirmation', destination: '/', permanent: true },
       { source: '/contact', destination: '/', permanent: true },
       { source: '/book-inspection', destination: '/', permanent: true },

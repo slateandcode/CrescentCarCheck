@@ -26,7 +26,7 @@ export default function NotFound() {
             <ButtonLink href="/" size="lg" arrow fullWidth className="xs:w-auto">
               Back to home
             </ButtonLink>
-            <ButtonLink href="/pricing" variant="ghost" size="lg" fullWidth className="xs:w-auto">
+            <ButtonLink href="/pricing/" variant="ghost" size="lg" fullWidth className="xs:w-auto">
               See inspection packages
             </ButtonLink>
           </div>

@@ -9,8 +9,8 @@
 //   2. Copies assets/ to public/assets/ (skips _-prefixed leftovers, __MACOSX, .DS_Store).
 //   3. Copies each page to public/<page>/index.html, rewriting:
 //        - canonical/og URLs from /book-inspection/... to the root domain
-//        - internal links and asset paths to absolute (/pricing, /assets/...),
-//          so they work without trailing slashes
+//        - internal links and asset paths to absolute (/pricing/, /assets/...),
+//          with trailing slashes to match how Netlify serves the folders
 //        - adds an "About Us" link (to the Next.js page at app/about) to the desktop nav and mobile menu
 //   4. Writes static-site/pages.json, which next.config.ts reads to route
 //      /<page> to public/<page>/index.html.
@@ -70,14 +70,15 @@ function transform(html, file) {
   // canonical / og URLs: /book-inspection/x/ -> /x, /book-inspection -> /
   html = html
     .replaceAll(`${DOMAIN}/book-inspection/assets/`, `${DOMAIN}/assets/`)
-    .replace(new RegExp(`${DOMAIN}/book-inspection/(${pageAlt})/`, 'g'), `${DOMAIN}/$1`)
+    .replace(new RegExp(`${DOMAIN}/book-inspection/(${pageAlt})/`, 'g'), `${DOMAIN}/$1/`)
     .replaceAll(`${DOMAIN}/book-inspection"`, `${DOMAIN}/"`)
   if (html.includes('/book-inspection')) fail(`${file}: still references /book-inspection after rewriting.`)
 
   // asset paths -> absolute
   html = html.replace(/(href|src)="(?:\.\.\/)?assets\//g, '$1="/assets/')
-  // internal page links -> absolute, no trailing slash
-  html = html.replace(new RegExp(`href="(?:\\.\\./)?(${pageAlt})/"`, 'g'), 'href="/$1"')
+  // internal page links -> absolute WITH trailing slash: Netlify serves public/<page>/index.html
+  // at /<page>/ and 301s /<page> to it, so slashed links avoid a redirect hop on every click
+  html = html.replace(new RegExp(`href="(?:\\.\\./)?(${pageAlt})/"`, 'g'), 'href="/$1/"')
   html = html.replace(/href="\.\.\/"/g, 'href="/"')
 
   // About link: desktop nav and mobile menu
