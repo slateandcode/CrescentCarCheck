@@ -11,6 +11,7 @@ import {
   rowToRecord,
 } from '@/lib/availability'
 import { notifyLatePaymentRefund, notifyPaidBooking } from '@/lib/email'
+import { commitLinkPayment, confirmBalancePaid, pingDispatch } from '@/lib/pay-link'
 import { createTentativeHold } from '@/lib/calendar'
 import type { Booking } from '@/types/booking'
 
@@ -70,6 +71,12 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object
+        // Booking links from the admin app (/pay/CCB-…) authorise first and are
+        // captured only after the capacity lock — see handleLinkPayment.
+        if (session.metadata?.flow === 'pay_link') {
+          await handleLinkPayment(session)
+          break
+        }
         // Only fulfil once the payment has actually settled. Standard card
         // payments are 'paid' the moment the session completes; delayed-
         // notification methods (e.g. Tabby/BNPL, common in the UAE) arrive here
@@ -101,6 +108,9 @@ export async function POST(req: Request) {
       }
       case 'checkout.session.expired': {
         const session = event.data.object
+        // A booking link's checkout expiring does NOT cancel the booking: it
+        // stays a soft hold and the customer can come back to the same link.
+        if (session.metadata?.flow === 'pay_link') break
         const bookingId = session.metadata?.booking_id
         if (bookingId) await markBookingCancelled(bookingId)
         break
@@ -213,5 +223,72 @@ async function handlePaid(session: Stripe.Checkout.Session): Promise<void> {
     if (eventId) await attachCalendarEvent(record.id, eventId)
   } catch (err) {
     console.error('[webhook] calendar hold failed (ignored)', err)
+  }
+}
+
+/**
+ * A payment on a booking link (/pay/CCB-…), created by staff in the admin app.
+ *
+ * The booking / deposit payment was only AUTHORISED (manual capture). Here the
+ * database runs the capacity lock (commit_link_payment): if the time is still
+ * free — the hold's inspector, or anyone — the booking is marked paid and the
+ * card is captured; if someone else got there first, the authorisation is
+ * cancelled, so the card is never charged, and the admin app shows the
+ * customer update to send ("first to pay wins", v443). A deposit booking's
+ * balance has no capacity question and is captured by Stripe straight away.
+ */
+async function handleLinkPayment(session: Stripe.Checkout.Session): Promise<void> {
+  const bookingId = session.metadata?.booking_id
+  const kind = session.metadata?.kind
+  if (!bookingId) return
+  const paymentIntentId =
+    typeof session.payment_intent === 'string' ? session.payment_intent : (session.payment_intent?.id ?? null)
+
+  if (kind === 'balance') {
+    if (session.payment_status !== 'paid') return
+    const applied = await confirmBalancePaid(bookingId, paymentIntentId)
+    if (!applied && paymentIntentId) {
+      // Either a replay of this same payment (already recorded under its intent)…
+      const existing = await getBookingById(bookingId)
+      if (existing?.stripe_payment_intent_id === paymentIntentId) return
+      // …or the balance was already settled — the inspector took it in cash, or
+      // another tab paid first — so this charge is a duplicate: refund it, the
+      // same way a payment that lands on a released hold is refunded.
+      console.warn('[webhook] balance already settled — refunding the duplicate payment', { bookingId })
+      await getStripe().refunds.create({ payment_intent: paymentIntentId }, { idempotencyKey: `balance-dup-refund-${paymentIntentId}` })
+    }
+    return
+  }
+  if (!paymentIntentId) return
+
+  const stripe = getStripe()
+  const intent = await stripe.paymentIntents.retrieve(paymentIntentId)
+  // A replay after we already captured or cancelled: nothing to do.
+  if (intent.status !== 'requires_capture') return
+
+  const result = await commitLinkPayment(bookingId, paymentIntentId)
+  let capture = result === 'ok'
+  if (result === 'already_paid') {
+    // Paid by THIS payment on an earlier delivery whose capture didn't go
+    // through → capture now. Paid by another payment (two tabs) → don't charge.
+    const existing = await getBookingById(bookingId)
+    capture = existing?.stripe_payment_intent_id === paymentIntentId
+  }
+
+  if (!capture) {
+    await stripe.paymentIntents.cancel(paymentIntentId, {}, { idempotencyKey: `link-cancel-${paymentIntentId}` })
+    console.warn('[webhook] link payment not committed — authorisation cancelled', { bookingId, result })
+    return
+  }
+
+  await stripe.paymentIntents.capture(paymentIntentId, {}, { idempotencyKey: `link-capture-${paymentIntentId}` })
+  if (result === 'ok') {
+    const row = await getBookingById(bookingId)
+    if (row) {
+      const amountPaid = typeof session.amount_total === 'number' ? session.amount_total / 100 : rowToRecord(row as Booking).totalPrice
+      await notifyPaidBooking(rowToRecord(row as Booking), { amountPaid, discount: 0 })
+    }
+    // Dispatch now rather than on the admin app's next page load.
+    await pingDispatch()
   }
 }
