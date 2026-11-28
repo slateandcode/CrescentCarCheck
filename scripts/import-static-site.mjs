@@ -12,6 +12,7 @@
 //        - internal links and asset paths to absolute (/pricing/, /assets/...),
 //          with trailing slashes to match how Netlify serves the folders
 //        - adds an "About Us" link (to the Next.js page at app/about) to the desktop nav and mobile menu
+//        - removes the hard-coded GTM container tag (Netlify injects the real one)
 //   4. Writes static-site/pages.json, which next.config.ts reads to route
 //      /<page> to public/<page>/index.html.
 
@@ -24,6 +25,12 @@ const PUBLIC = path.join(ROOT, 'public')
 const EXTRAS = path.join(ROOT, 'static-site')
 const MANIFEST = path.join(EXTRAS, 'pages.json')
 const DOMAIN = 'https://crescentcarcheck.com'
+// Google Tag Manager: the agency's container (GTM-P6FFFH9H) is added to every
+// static page by Netlify's snippet injection (site settings, outside this repo).
+// The client's zips also hard-code a container (GTM-MBRLTHV, from another
+// project), so the import strips that <script> tag; loading a container here
+// too would double-count. The inline dataLayer / gtm.js-event setup is kept.
+const GTM_NETLIFY_ID = 'GTM-P6FFFH9H'
 
 const fail = (msg) => {
   console.error(`\n✗ ${msg}\n`)
@@ -56,6 +63,18 @@ fs.cpSync(path.join(SRC, 'assets'), path.join(PUBLIC, 'assets'), {
   recursive: true,
   filter: (src) => !skip(path.basename(src)),
 })
+const configJs = path.join(PUBLIC, 'assets', 'js', 'config.js')
+if (fs.existsSync(configJs)) {
+  const cfg = fs.readFileSync(configJs, 'utf8')
+  if (/gtmId:\s*'GTM-/.test(cfg)) fail('config.js sets gtmId; that would load a second GTM container. Empty it.')
+  fs.writeFileSync(
+    configJs,
+    cfg.replace(
+      /\/\/ Google Tag Manager is loaded[^\n]*/,
+      `// Google Tag Manager (${GTM_NETLIFY_ID}) is added to every page by Netlify snippet injection.`,
+    ),
+  )
+}
 
 // ---- 3. pages ----------------------------------------------------------------
 const pageAlt = allPages.join('|')
@@ -73,6 +92,22 @@ function transform(html, file) {
     .replace(new RegExp(`${DOMAIN}/book-inspection/(${pageAlt})/`, 'g'), `${DOMAIN}/$1/`)
     .replaceAll(`${DOMAIN}/book-inspection"`, `${DOMAIN}/"`)
   if (html.includes('/book-inspection')) fail(`${file}: still references /book-inspection after rewriting.`)
+
+  // Tag Manager: drop the hard-coded container; Netlify injects GTM_NETLIFY_ID
+  html = mustReplace(
+    html,
+    /\n[ \t]*<script\s+async\s+src="https:\/\/www\.googletagmanager\.com\/gtm\.js\?id=GTM-[A-Z0-9]+"\s*><\/script>/,
+    '',
+    'the Google Tag Manager container <script> tag',
+    file,
+  )
+  html = html.replace(
+    '<!-- Google Tag Manager -->',
+    `<!-- Google Tag Manager: dataLayer setup only. The container (${GTM_NETLIFY_ID}) is injected by Netlify; don't load one here. -->`,
+  )
+  if (/googletagmanager\.com\/gtm\.js|GTM-[A-Z0-9]{4,}/.test(html.replace(GTM_NETLIFY_ID, ''))) {
+    fail(`${file}: still loads or names a GTM container after stripping it.`)
+  }
 
   // asset paths -> absolute
   html = html.replace(/(href|src)="(?:\.\.\/)?assets\//g, '$1="/assets/')
