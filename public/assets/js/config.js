@@ -3,7 +3,7 @@ window.CRESCENT_CONFIG = {
   // Empty = nothing is sent anywhere: the form hands the details to WhatsApp instead, so no lead is lost.
   formEndpoint: '',
 
-  // Google Tag Manager is loaded directly in the <head> of index.html (GTM-P6FFFH9H).
+  // Google Tag Manager (GTM-P6FFFH9H) is added to every page by Netlify snippet injection.
   // Leave gtmId empty so a second container is not injected here.
   gtmId: '',
 
