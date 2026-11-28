@@ -181,11 +181,6 @@ function PayCard({ link }: { link: PayLink }) {
           <Clock className="h-4 w-4" aria-hidden /> Your time is reserved for {minutes} more minute{minutes === 1 ? '' : 's'}.
         </p>
       )}
-      {link.state === 'available_unreserved' && (
-        <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-4 py-3 text-sm text-light-text">
-          Available when checked — not reserved while this page is open. If someone books it first, your card won’t be charged and you can pick another time.
-        </p>
-      )}
       <Button className="mt-5" size="lg" fullWidth loading={pending} onClick={pay}>
         Pay {what} · AED {link.due_now_aed}
       </Button>

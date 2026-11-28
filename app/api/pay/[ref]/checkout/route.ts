@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { isStripeConfigured } from '@/lib/stripe'
-import { createPayCheckout, getPayLink, isPayRef, payKindOf } from '@/lib/pay-link'
+import { STRIPE_MIN_AED, createPayCheckout, getPayLink, isPayRef, payKindOf, toFils } from '@/lib/pay-link'
 import { clientIp, rateLimitOk } from '@/lib/rate-limit'
 
 /**
@@ -33,6 +33,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ ref: st
       return NextResponse.json(
         { ok: false, error: link.state === 'time_taken' ? 'That time is no longer available — please choose another.' : 'There’s nothing to pay on this booking right now.' },
         { status: 409 },
+      )
+    }
+    if (toFils(link.due_now_aed) < STRIPE_MIN_AED * 100) {
+      return NextResponse.json(
+        { ok: false, error: `Card payments start from AED ${STRIPE_MIN_AED}. Please WhatsApp us to settle AED ${link.due_now_aed}.` },
+        { status: 400 },
       )
     }
     const session = await createPayCheckout(link, appUrl(req))

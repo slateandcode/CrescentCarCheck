@@ -23,7 +23,7 @@ const HEADLINES: Record<PayLink['state'], [string, string]> = {
   cancelled: ['This booking was cancelled', 'Message us on WhatsApp and we’ll find you a new time.'],
   offline: ['Your inspection is booked', 'Nothing to pay online for this booking.'],
   hold_active: ['Confirm your inspection', 'Your time is reserved — pay now to lock it in.'],
-  available_unreserved: ['Confirm your inspection', 'Your time is still free — it isn’t reserved while this page is open, so pay to lock it in.'],
+  available_unreserved: ['Confirm your inspection', 'Your time is still free — pay now to lock it in.'],
   time_taken: ['Pick a new time', 'Your original time was taken before payment. Choose another below — nothing is charged until you pay.'],
   details_needed: ['Payment received — one last step', 'Tell us exactly where the car is and who to call on the day.'],
   balance_due: ['Pay the balance', 'Your deposit is in. Pay the rest whenever you’re ready.'],

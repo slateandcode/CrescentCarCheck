@@ -115,6 +115,17 @@ export async function submitPayDetails(
   return 'error'
 }
 
+/**
+ * Stripe's smallest card payment in AED (its documented minimum charge). Below
+ * it Stripe refuses to create the Checkout session, so a link for less can't be
+ * paid online — the page says so plainly instead of "Could not start the payment"
+ * (Ronit 2026-11-28 tried a 1 AED test link).
+ */
+export const STRIPE_MIN_AED = 2
+
+/** Fils (1 AED = 100 fils), always a whole number for Stripe. */
+export const toFils = (aed: number) => Math.round(Number(aed) * 100)
+
 /** 'booking' = the full price · 'deposit' = the deposit · 'balance' = a deposit booking's balance. */
 export type PayKind = 'booking' | 'deposit' | 'balance'
 
@@ -134,6 +145,7 @@ export function payKindOf(link: PayLink): PayKind | null {
 export async function createPayCheckout(link: PayLink, appUrl: string) {
   const kind = payKindOf(link)
   if (!kind || link.due_now_aed <= 0) throw new Error('Nothing to pay on this link right now.')
+  if (toFils(link.due_now_aed) < STRIPE_MIN_AED * 100) throw new Error(`Below Stripe's AED ${STRIPE_MIN_AED} minimum.`)
   const label = kind === 'deposit' ? 'deposit' : kind === 'balance' ? 'balance' : 'inspection'
   return getStripe().checkout.sessions.create({
     mode: 'payment',
@@ -144,7 +156,7 @@ export async function createPayCheckout(link: PayLink, appUrl: string) {
         quantity: 1,
         price_data: {
           currency: 'aed',
-          unit_amount: link.due_now_aed * 100,
+          unit_amount: toFils(link.due_now_aed),
           product_data: {
             name: `Crescent Car Check - ${link.package_name} ${label}`,
             description: `${link.vehicle} · ${link.area}, ${link.emirate}`,
