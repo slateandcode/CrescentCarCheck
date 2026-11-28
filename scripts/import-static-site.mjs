@@ -12,6 +12,7 @@
 //        - internal links and asset paths to absolute (/pricing/, /assets/...),
 //          with trailing slashes to match how Netlify serves the folders
 //        - adds an "About Us" link (to the Next.js page at app/about) to the desktop nav and mobile menu
+//        - sets the Google Tag Manager container to GTM_ID (also in assets/js/config.js)
 //   4. Writes static-site/pages.json, which next.config.ts reads to route
 //      /<page> to public/<page>/index.html.
 
@@ -24,6 +25,11 @@ const PUBLIC = path.join(ROOT, 'public')
 const EXTRAS = path.join(ROOT, 'static-site')
 const MANIFEST = path.join(EXTRAS, 'pages.json')
 const DOMAIN = 'https://crescentcarcheck.com'
+// The site's Google Tag Manager container, per the ads agency (2026-11-28). The
+// client's zips carried GTM-MBRLTHV, a container from another project; every
+// GTM id in the pages and config.js is forced to this one.
+const GTM_ID = 'GTM-P6FFFH9H'
+const GTM_RE = /GTM-[A-Z0-9]{4,}/g
 
 const fail = (msg) => {
   console.error(`\n✗ ${msg}\n`)
@@ -56,6 +62,8 @@ fs.cpSync(path.join(SRC, 'assets'), path.join(PUBLIC, 'assets'), {
   recursive: true,
   filter: (src) => !skip(path.basename(src)),
 })
+const configJs = path.join(PUBLIC, 'assets', 'js', 'config.js')
+if (fs.existsSync(configJs)) fs.writeFileSync(configJs, fs.readFileSync(configJs, 'utf8').replace(GTM_RE, GTM_ID))
 
 // ---- 3. pages ----------------------------------------------------------------
 const pageAlt = allPages.join('|')
@@ -73,6 +81,10 @@ function transform(html, file) {
     .replace(new RegExp(`${DOMAIN}/book-inspection/(${pageAlt})/`, 'g'), `${DOMAIN}/$1/`)
     .replaceAll(`${DOMAIN}/book-inspection"`, `${DOMAIN}/"`)
   if (html.includes('/book-inspection')) fail(`${file}: still references /book-inspection after rewriting.`)
+
+  // Tag Manager container -> the site's own (see GTM_ID)
+  html = mustReplace(html, /gtm\.js\?id=GTM-[A-Z0-9]{4,}/, `gtm.js?id=${GTM_ID}`, 'the Google Tag Manager snippet', file)
+  html = html.replace(GTM_RE, GTM_ID)
 
   // asset paths -> absolute
   html = html.replace(/(href|src)="(?:\.\.\/)?assets\//g, '$1="/assets/')
